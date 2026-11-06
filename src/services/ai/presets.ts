@@ -11,26 +11,26 @@ export type DemoFile = {
 
 export const DEMO_FILES: DemoFile[] = [
   {
-    name: 'recibo-arriendo-bodega.jpg', mimeType: 'image/jpeg', size: 214_380, url: '/demo/recibo-arriendo-bodega.jpg', channel: 'whatsapp',
+    name: 'recibo-arriendo-bodega.jpg', mimeType: 'image/jpeg', size: 44_118, url: '/demo/recibo-arriendo-bodega.jpg', channel: 'whatsapp',
     description: 'Foto de un recibo de caja', view: 'image', mode: 'text', options: { singleRecord: true, type: 'expense' },
     extractedText: 'RECIBO DE CAJA No. 0847\nInversiones Ríos S.A.S. — NIT 900.412.775-3\nFecha: 28/10/2026\nRecibimos de: Empresa B, por cuenta de Empresa A\nLa suma de: $2.350.000\nConcepto: Arriendo de la bodega, mes de octubre de 2026\nForma de pago: Transferencia desde Bancolombia',
   },
   {
-    name: 'factura-servicios.pdf', mimeType: 'application/pdf', size: 96_512, url: '/demo/factura-servicios.pdf', channel: 'email',
+    name: 'factura-servicios.pdf', mimeType: 'application/pdf', size: 1_749, url: '/demo/factura-servicios.pdf', channel: 'email',
     description: 'Factura de servicios públicos', view: 'pdf', mode: 'text', options: { singleRecord: true, type: 'task', taskTitle: 'Pagar factura de servicios públicos EPM (local Empresa B)' },
     extractedText: 'EPM — Empresas Públicas\nFACTURA DE SERVICIOS PÚBLICOS\nCliente: Empresa B — Local comercial\nPeriodo facturado: septiembre de 2026\nEnergía 412 kWh · Acueducto 18 m³\nFecha límite de pago: 05/11/2026\nTotal a pagar: $ 712.480',
   },
   {
-    name: 'nota-de-voz-taller.ogg', mimeType: 'audio/ogg', size: 182_000, url: '/demo/nota-de-voz-taller.ogg', channel: 'whatsapp',
+    name: 'nota-de-voz-taller.ogg', mimeType: 'audio/ogg', size: 55_745, url: '/demo/nota-de-voz-taller.ogg', channel: 'whatsapp',
     description: 'Nota de voz por WhatsApp', view: 'audio', mode: 'text',
     extractedText: 'Hola, te cuento que antier le pagué a Transportes Rápido Sur 350 mil por el flete de la bodega, eso salió del Banco B. Y el viernes toca pagar la quincena del taller.',
   },
   {
-    name: 'chat-whatsapp-socios.txt', mimeType: 'text/plain', size: 1_024, url: '/demo/chat-whatsapp-socios.txt', channel: 'whatsapp_export',
+    name: 'chat-whatsapp-socios.txt', mimeType: 'text/plain', size: 695, url: '/demo/chat-whatsapp-socios.txt', channel: 'whatsapp_export',
     description: 'Chat exportado de WhatsApp', view: 'text', mode: 'chat', extractedText: '',
   },
   {
-    name: 'extracto-bancolombia-oct.xlsx', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', size: 18_944, url: '/demo/extracto-bancolombia-oct.xlsx', channel: 'email',
+    name: 'extracto-bancolombia-oct.xlsx', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', size: 6_858, url: '/demo/extracto-bancolombia-oct.xlsx', channel: 'email',
     description: 'Extracto bancario en Excel', view: 'table', mode: 'statement', accountId: 'cta-bancolombia',
     extractedText: [
       '02/10/2026  TRANSF RECIBIDA DAVIVIENDA EMP C  +1.500.000',
@@ -41,7 +41,7 @@ export const DEMO_FILES: DemoFile[] = [
     ].join('\n'),
   },
   {
-    name: 'correo-proveedor.eml', mimeType: 'message/rfc822', size: 4_310, url: '/demo/correo-proveedor.eml', channel: 'email',
+    name: 'correo-proveedor.eml', mimeType: 'message/rfc822', size: 655, url: '/demo/correo-proveedor.eml', channel: 'email',
     description: 'Correo de un proveedor', view: 'email', mode: 'text', options: { singleRecord: true, type: 'cost' },
     extractedText: 'De: Facturación Concretos del Valle <facturacion@concretosdelvalle.co>\nPara: bandeja@cajaclara.co\nAsunto: Confirmación de pago recibido – Factura FE-20931\nFecha: 27/10/2026\n\nBuen día,\n\nConfirmamos que recibimos su pago por $ 4.870.000 correspondiente a la factura FE-20931 de concreto premezclado para la Obra Laureles, realizado desde su cuenta Davivienda.\n\nAdjuntamos el soporte de pago.\n\nCordialmente,\nÁrea de cartera — Concretos del Valle S.A.',
   },
