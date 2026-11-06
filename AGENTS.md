@@ -25,22 +25,23 @@ Cuando exista backend (NestJS): `services/http` reemplaza a `services/mock` cump
 ```
 src/
   domain/      Lógica pura (sin React): motor contable, indicadores, amortización, agenda. Con pruebas.
-  services/    api.ts = único punto de entrada de las pantallas. mock/ = implementación actual. ia/ = IA simulada.
+  services/    api.ts = único punto de entrada de las pantallas. mock/ = implementación actual. ai/ = IA simulada.
   store/       Estado persistido. Solo lo importan los servicios mock.
   data/        Datos semilla.
-  hooks/       useConsulta (consulta + recarga al cambiar datos), useSesion.
-  components/  Compartidos: comunes, paneles (drill-down → movimiento → soporte), Layout, Cargador. ui/ = shadcn.
-  features/    Una carpeta por pantalla.
+  hooks/       useServiceQuery (consulta + recarga al cambiar datos), useSession.
+  components/  Compartidos: common, panels (drill-down → movimiento → soporte), Layout, Uploader. ui/ = shadcn.
+  features/    Una carpeta por pantalla (nombres en inglés; las rutas visibles siguen en español).
   lib/         format.ts (formatos colombianos), utils.ts.
 ```
 
 **Reglas:**
-- Las pantallas **solo** importan `@/services/api`, nunca `store/` ni `services/mock/` directamente. (Excepción documentada: `useSesion` lee la sesión de forma síncrona para guardas de ruta.)
+- Las pantallas **solo** importan `@/services/api`, nunca `store/` ni `services/mock/` directamente. (Excepción documentada: `useSession` lee la sesión de forma síncrona para guardas de ruta.)
 - Los servicios devuelven `Promise` y simulan latencia de 200 a 600 ms; la IA simulada, de 1,5 a 3 s.
 - **Ninguna cifra se calcula en un componente.** Todo sale de `domain/`.
-- Los permisos por rol se verifican en los servicios (`exigir(...)`), además de ocultar o desactivar botones.
-- Los `select` son nativos (`Selector` en `components/comunes.tsx`) y solo ofrecen valores de la configuración.
-- Montos con `Money` / `formatCOP`; fechas con `Fecha` / `formatFecha` e `InputFecha` (siempre `dd/mm/aaaa`).
+- Los permisos por rol se verifican en los servicios (`requirePermission(...)`), además de ocultar o desactivar botones.
+- Los `select` son nativos (`Selector` en `components/common.tsx`) y solo ofrecen valores de la configuración.
+- Montos con `Money` / `formatCOP`; fechas con `DateText` / `formatDate` y `DateInput` (siempre `dd/mm/aaaa`).
+- **Identificadores y valores internos en inglés** según el glosario (`docs/contexto-prototipo.md` §16). Los textos visibles, comentarios y rutas van en español. Para mostrar un valor interno, usa su etiqueta en español (por ejemplo, `ROLE_LABEL`, `CHANNEL_LABEL`, `TYPE_NAME`).
 
 ## Comandos
 
