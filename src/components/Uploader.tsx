@@ -102,19 +102,19 @@ export function Uploader({ large = false, placeholder }: { large?: boolean; plac
         </div>
       )}
       <div className="flex items-center gap-1 border-t px-2 py-2">
-        <Button variant="ghost" size="sm" onClick={() => (recording ? stopDictation() : startDictation())} className={cn(recording && 'text-red-600')}>
+        <Button variant="ghost" size="sm" onClick={() => (recording ? stopDictation() : startDictation())} className={cn('h-11 sm:h-7', recording && 'text-red-600')}>
           {recording ? <Square className="fill-current" /> : <Mic />}<span className="hidden sm:inline">{recording ? 'Detener' : 'Dictar'}</span>
         </Button>
-        <label className="inline-flex h-7 cursor-pointer items-center gap-1 rounded-md px-2.5 text-[0.8rem] font-medium hover:bg-muted">
+        <label className="inline-flex h-11 cursor-pointer items-center gap-1 rounded-md px-2.5 text-[0.8rem] font-medium hover:bg-muted sm:h-7">
           <Paperclip className="size-3.5" /><span className="hidden sm:inline">Adjuntar</span>
           <input type="file" multiple accept={ACCEPTED_TYPES} className="hidden" onChange={(e) => { addFiles(e.target.files); e.target.value = '' }} />
         </label>
-        <label className="inline-flex h-7 cursor-pointer items-center gap-1 rounded-md px-2.5 text-[0.8rem] font-medium hover:bg-muted sm:hidden">
+        <label className="inline-flex h-11 cursor-pointer items-center gap-1 rounded-md px-2.5 text-[0.8rem] font-medium hover:bg-muted sm:hidden">
           <Camera className="size-3.5" />
           <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { addFiles(e.target.files); e.target.value = '' }} />
         </label>
         <span className="ml-auto hidden items-center gap-1 text-xs text-muted-foreground md:flex"><Sparkles className="size-3" />La IA propone, tú apruebas</span>
-        <Button onClick={send} disabled={sending || (!text.trim() && !files.length)} className="ml-2">
+        <Button onClick={send} disabled={sending || (!text.trim() && !files.length)} className="ml-2 h-11 sm:h-8">
           {sending ? <Loader2 className="animate-spin" /> : <SendHorizontal />}Enviar
         </Button>
       </div>
