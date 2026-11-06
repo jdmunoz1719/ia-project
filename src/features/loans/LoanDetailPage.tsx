@@ -59,6 +59,7 @@ export default function LoanDetailPage() {
         <Stat label="Saldo según la tabla"><Money value={d.scheduleBalance} /></Stat>
         <Stat label="Intereses pagados"><Money value={d.interestPaid} /></Stat>
         <Stat label="Cargos pagados"><Money value={d.feesPaid} /></Stat>
+        <p className="col-span-2 text-xs text-muted-foreground md:col-span-4">El saldo real es lo que debes hoy; la tabla supone que pagaste todas las cuotas a tiempo.</p>
         {d.bankBalance && (
           <div className="col-span-2 md:col-span-4">
             <span className="text-xs text-muted-foreground">Saldo que reporta el banco al <DateText iso={d.bankBalance.date} /></span>{' '}
@@ -71,7 +72,7 @@ export default function LoanDetailPage() {
 
       <section className="mb-4 rounded-xl border bg-card p-4">
         <h2 className="mb-2 text-sm font-semibold">Saldo real frente al saldo según la tabla</h2>
-        <div className="h-64 w-full" role="img" aria-label="Gráfica del saldo real y el saldo según la tabla de amortización">
+        <div className="h-64 w-full" role="img" aria-label={`Gráfica del saldo real (${formatCOP(d.actualBalance)}) frente al saldo según la tabla de amortización (${formatCOP(d.scheduleBalance)})`}>
           <ResponsiveContainer>
             <LineChart data={d.series} margin={{ left: 0, right: 8, top: 4, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -79,8 +80,8 @@ export default function LoanDetailPage() {
               <YAxis tickFormatter={(v: number) => `${Math.round(v / 1e6)} M`} fontSize={11} width={44} />
               <Tooltip formatter={(v) => formatCOP(Number(v))} labelFormatter={(v) => formatDate(String(v))} />
               <Legend />
-              <Line type="monotone" dataKey="table" name="Según la tabla" stroke="#64748b" strokeDasharray="5 4" dot={false} />
-              <Line type="monotone" dataKey="real" name="Saldo real" stroke="#0d9488" strokeWidth={2.5} dot={{ r: 3 }} connectNulls={false} />
+              <Line type="monotone" dataKey="table" name="Según la tabla" stroke="#475569" strokeDasharray="5 4" dot={false} />
+              <Line type="monotone" dataKey="real" name="Saldo real" stroke="#0f766e" strokeWidth={2.5} dot={{ r: 3 }} connectNulls={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -119,8 +120,8 @@ export default function LoanDetailPage() {
                       : <Tag><Circle />Futura</Tag>}
                   </td>
                   <td className="px-3 py-2 text-right whitespace-nowrap">
-                    {r.status === 'paid' && r.transactionId && <Button size="xs" variant="ghost" onClick={() => openTransaction(r.transactionId!)}>Ver pago</Button>}
-                    {r.status !== 'paid' && editable && <Button size="xs" variant={r.status === 'overdue' ? 'default' : 'outline'} onClick={() => setDlg({ kind: 'pay', row: r })}>Registrar pago</Button>}
+                    {r.status === 'paid' && r.transactionId && <Button size="xs" variant="ghost" className="h-8" aria-label={`Ver el pago de la cuota ${r.number}`} onClick={() => openTransaction(r.transactionId!)}>Ver pago</Button>}
+                    {r.status !== 'paid' && editable && <Button size="xs" variant={r.status === 'overdue' ? 'default' : 'outline'} className={cn('h-8', r.status === 'overdue' && 'font-semibold shadow-sm')} aria-label={`Registrar pago de la cuota ${r.number}`} onClick={() => setDlg({ kind: 'pay', row: r })}>Registrar pago</Button>}
                   </td>
                 </tr>
               ))}

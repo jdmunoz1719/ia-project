@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   AlertTriangle, ArrowDownLeft, ArrowLeft, ArrowLeftRight, ArrowUpRight, Check, CheckCircle2, Copy, Eye, ListPlus, Loader2,
-  Plus, RefreshCw, Sparkles, SplitSquareHorizontal, Trash2, Undo2, X, XCircle,
+  MoreHorizontal, Plus, RefreshCw, Sparkles, SplitSquareHorizontal, Trash2, Undo2, X, XCircle,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Field, LoadingRows, Confidence, Tag, DateText, MoneyInput, DateInput, Money, Selector, EmptyState } from '@/components/common'
 import { openTransaction, ChannelIcon, AttachmentViewer, type Mark } from '@/components/panels'
 import { useServiceQuery } from '@/hooks/useServiceQuery'
@@ -53,9 +54,9 @@ export default function ReviewPage() {
         </div>
         {can('upload') && (
           <div className="flex flex-wrap gap-2 sm:ml-auto">
-            <Button variant="outline" size="sm" disabled={processing} onClick={() => action(() => api.inbox.reread(item.id), 'La IA está leyendo de nuevo')}><RefreshCw />Volver a leer</Button>
-            <Button variant="outline" size="sm" disabled={processing} onClick={() => action(() => api.inbox.addManual(item.id, 'registro'))}><Plus />Registro</Button>
-            <Button variant="outline" size="sm" disabled={processing} onClick={() => action(() => api.inbox.addManual(item.id, 'task'))}><ListPlus />Tarea</Button>
+            <Button variant="outline" className="h-10" disabled={processing} onClick={() => action(() => api.inbox.reread(item.id), 'La IA está leyendo de nuevo')}><RefreshCw />Volver a leer</Button>
+            <Button variant="outline" className="h-10" disabled={processing} onClick={() => action(() => api.inbox.addManual(item.id, 'registro'))}><Plus />Agregar movimiento</Button>
+            <Button variant="outline" className="h-10" disabled={processing} onClick={() => action(() => api.inbox.addManual(item.id, 'task'))}><ListPlus />Agregar tarea</Button>
           </div>
         )}
       </div>
@@ -67,9 +68,9 @@ export default function ReviewPage() {
         </div>
       )}
 
-      <div className="mb-4 flex gap-1 border-b text-sm">
+      <div role="tablist" aria-label="Secciones" className="mb-4 flex gap-1 border-b text-sm">
         {(['revision', 'historial'] as const).map((t) => (
-          <button key={t} onClick={() => setTab(t)} className={cn('-mb-px border-b-2 px-3 py-2', tab === t ? 'border-primary font-medium text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground')}>
+          <button key={t} role="tab" aria-selected={tab === t} type="button" onClick={() => setTab(t)} className={cn('-mb-px min-h-11 border-b-2 px-3 py-2 sm:min-h-10', tab === t ? 'border-primary font-medium text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground')}>
             {t === 'revision' ? 'Revisión' : `Historial (${history.length})`}
           </button>
         ))}
@@ -166,6 +167,15 @@ function ProposalCard({ n, itemId, p, cfg, onHover }: { n: number; itemId: strin
     setBusy(true)
     try { const r = await fn(); toast.success(ok, onView ? { action: { label: 'Ver', onClick: () => onView(r) } } : undefined) } catch (e) { toast.error((e as Error).message) } finally { setBusy(false) }
   }
+  // Descartar, rechazar o marcar duplicado se pueden deshacer desde el aviso (reabre la propuesta).
+  const close = async (status: 'discarded' | 'rejected' | 'duplicate', ok: string) => {
+    setBusy(true)
+    try {
+      await api.inbox.setStatus(itemId, p.id, status)
+      toast.success(ok, { duration: 10000, action: { label: 'Deshacer', onClick: () => { api.inbox.setStatus(itemId, p.id, 'pending').then(() => toast.success('Propuesta reabierta')).catch((e) => toast.error((e as Error).message)) } } })
+    } catch (e) { toast.error((e as Error).message) } finally { setBusy(false) }
+  }
+  const blocked = !isTask && !!effect?.errors.length
   const approve = () => run(() => api.inbox.approve(itemId, p.id, c, type, changed), isTask ? 'Tarea creada' : 'Movimiento aprobado',
     (r) => { const x = r as { type: string; id: string }; if (x.type === 'transaction') openTransaction(x.id) })
 
@@ -205,12 +215,12 @@ function ProposalCard({ n, itemId, p, cfg, onHover }: { n: number; itemId: strin
         )}
         {p.note && <p className="flex items-start gap-1.5 text-xs text-amber-800"><AlertTriangle className="mt-0.5 size-3.5 shrink-0" />{p.note}</p>}
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field label="Tipo"><Selector value={type} onChange={(e) => setType(e.target.value as TransactionType)} options={TYPES.map((t) => ({ value: t, label: TYPE_NAME[t] }))} /></Field>
           {isTask ? (
             <>
               <div {...h('due')}><Field label="Vence"><DateInput value={c.due} onChange={(v) => upd({ due: v })} /></Field></div>
-              <div className="col-span-2" {...h('description')}><Field label="Tarea"><Input value={c.taskTitle ?? ''} onChange={(e) => upd({ taskTitle: e.target.value })} /></Field></div>
+              <div className="sm:col-span-2" {...h('description')}><Field label="Tarea"><Input value={c.taskTitle ?? ''} onChange={(e) => upd({ taskTitle: e.target.value })} /></Field></div>
               <div {...h('entityId')}><Field label="Empresa"><Selector value={allocs[0]?.entityId ?? ''} onChange={(e) => setOwner(e.target.value)} options={entityOptions} emptyLabel="(Sin empresa)" /></Field></div>
               <Field label="Crédito vinculado"><Selector value={c.loanId ?? ''} onChange={(e) => upd({ loanId: e.target.value || undefined })} options={cfg.loans.map((x) => ({ value: x.id, label: x.name }))} emptyLabel="(Ninguno)" /></Field>
             </>
@@ -233,7 +243,7 @@ function ProposalCard({ n, itemId, p, cfg, onHover }: { n: number; itemId: strin
               {(type === 'loan_payment' || type === 'loan_disbursement') && (
                 <Field label="Crédito"><Selector value={c.loanId ?? ''} onChange={(e) => upd({ loanId: e.target.value || undefined })} options={cfg.loans.map((x) => ({ value: x.id, label: `${x.name} · ${x.bank}` }))} emptyLabel="(Elegir crédito)" /></Field>
               )}
-              <div className="col-span-2" {...h('description')}><Field label="Descripción"><Input value={c.description ?? ''} onChange={(e) => upd({ description: e.target.value })} /></Field></div>
+              <div className="sm:col-span-2" {...h('description')}><Field label="Descripción"><Input value={c.description ?? ''} onChange={(e) => upd({ description: e.target.value })} /></Field></div>
             </>
           )}
         </div>
@@ -275,27 +285,34 @@ function ProposalCard({ n, itemId, p, cfg, onHover }: { n: number; itemId: strin
         )}
       </div>
 
-      <footer className="flex flex-wrap items-center gap-2 border-t px-4 py-3">
-        <ActionsHint can={can('approve')}>
-          <Button onClick={approve} disabled={busy || !can('approve') || (!isTask && !!effect?.errors.length)} className="bg-emerald-600 text-white hover:bg-emerald-700">
-            {busy ? <Loader2 className="animate-spin" /> : <Check />}{changed ? 'Corregir y aprobar' : 'Aprobar'}
-          </Button>
-          <Button variant="outline" disabled={busy || !can('approve')} onClick={() => run(() => api.inbox.setStatus(itemId, p.id, 'discarded'), 'Propuesta descartada')}><X />Descartar</Button>
-          <Button variant="ghost" disabled={busy || !can('approve')} onClick={() => run(() => api.inbox.setStatus(itemId, p.id, 'rejected'), 'Propuesta rechazada')}><XCircle />Rechazar</Button>
-          <Button variant="ghost" disabled={busy || !can('approve')} onClick={() => run(() => api.inbox.setStatus(itemId, p.id, 'duplicate'), 'Marcada como duplicado')}><Copy />Duplicado</Button>
-        </ActionsHint>
-        {changed && <Button variant="ghost" size="sm" className="ml-auto" onClick={() => { setType(p.type); setC(structuredClone(p.fields)) }}><Undo2 />Deshacer cambios</Button>}
+      {/* Barra fija abajo: "Aprobar" siempre a la mano y, si está apagado, el motivo al lado. */}
+      <footer className="sticky bottom-0 z-10 flex flex-wrap items-center gap-2 rounded-b-xl border-t bg-card/95 px-4 py-3 backdrop-blur">
+        <Button className="h-10 bg-emerald-700 px-4 text-white hover:bg-emerald-800" onClick={approve} disabled={busy || !can('approve') || blocked}>
+          {busy ? <Loader2 className="animate-spin" /> : <Check />}{changed ? 'Corregir y aprobar' : 'Aprobar'}
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger render={<Button variant="outline" className="h-10" disabled={busy || !can('approve')} />}><MoreHorizontal />Más acciones</DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-72">
+            <DropdownMenuItem className="flex-col items-start gap-0.5 py-2" onClick={() => close('discarded', 'Propuesta descartada')}>
+              <span className="flex items-center gap-2 font-medium"><X className="size-4" />Descartar</span>
+              <span className="text-xs text-muted-foreground">No es un movimiento; la dejas fuera sin registrar nada.</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="flex-col items-start gap-0.5 py-2" onClick={() => close('rejected', 'Propuesta rechazada')}>
+              <span className="flex items-center gap-2 font-medium"><XCircle className="size-4" />Rechazar</span>
+              <span className="text-xs text-muted-foreground">La IA entendió mal; el rechazo queda en el historial.</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="flex-col items-start gap-0.5 py-2" onClick={() => close('duplicate', 'Marcada como duplicado')}>
+              <span className="flex items-center gap-2 font-medium"><Copy className="size-4" />Duplicado</span>
+              <span className="text-xs text-muted-foreground">Ya lo registraste antes; no se vuelve a contar.</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        {changed && <Button variant="ghost" className="h-10" onClick={() => { setType(p.type); setC(structuredClone(p.fields)) }}><Undo2 />Deshacer cambios</Button>}
+        {!can('approve')
+          ? <span className="w-full text-xs text-muted-foreground">Tu rol puede cargar y corregir, pero no aprobar. Un administrador debe aprobarla.</span>
+          : blocked && <span role="status" className="flex w-full items-center gap-1.5 text-sm text-amber-800"><AlertTriangle className="size-4 shrink-0" />No se puede aprobar todavía: {effect!.errors.join(' ')}</span>}
       </footer>
     </article>
-  )
-}
-
-function ActionsHint({ can, children }: { can: boolean; children: ReactNode }) {
-  return (
-    <>
-      {children}
-      {!can && <span className="w-full text-xs text-muted-foreground">Tu rol puede cargar y corregir, pero no aprobar. Un administrador debe aprobarla.</span>}
-    </>
   )
 }
 

@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format, parseISO, startOfWeek } from 'date-fns'
-import { AlertTriangle, CalendarCheck, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Clock, List, Plus } from 'lucide-react'
+import { AlertTriangle, CalendarCheck, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Clock, List, ListChecks, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -37,7 +37,7 @@ const StatusTag = ({ status }: { status: Status }) => {
 export default function AgendaPage() {
   const { today, can } = useSession()
   const [month, setMonth] = useState(today.slice(0, 7))
-  const [view, setView] = useState<'list' | 'calendar'>('list')
+  const [view, setView] = useState<'list' | 'calendar' | 'tasks'>('list')
   const [selectedDay, setSelectedDay] = useState(today)
   const [paying, setPaying] = useState<Item>()
   const [newTask, setNewTask] = useState(false)
@@ -96,12 +96,13 @@ export default function AgendaPage() {
           <Button variant="outline" size="icon-sm" aria-label="Mes siguiente" onClick={() => setMonth(format(addMonths(parseISO(from), 1), 'yyyy-MM'))}><ChevronRight /></Button>
         </div>
         <div className="flex gap-1" role="group" aria-label="Vista">
-          <Button size="sm" variant={view === 'list' ? 'default' : 'outline'} onClick={() => setView('list')}><List /> Lista</Button>
-          <Button size="sm" variant={view === 'calendar' ? 'default' : 'outline'} onClick={() => setView('calendar')}><CalendarDays /> Calendario</Button>
+          <Button size="sm" aria-pressed={view === 'list'} variant={view === 'list' ? 'default' : 'outline'} onClick={() => setView('list')}><List /> Lista</Button>
+          <Button size="sm" aria-pressed={view === 'calendar'} variant={view === 'calendar' ? 'default' : 'outline'} onClick={() => setView('calendar')}><CalendarDays /> Calendario</Button>
+          <Button size="sm" aria-pressed={view === 'tasks'} variant={view === 'tasks' ? 'default' : 'outline'} onClick={() => setView('tasks')}><ListChecks /> Tareas</Button>
         </div>
       </div>
 
-      {loading || !items ? <LoadingRows rows={5} /> : items.length === 0 ? (
+      {view === 'tasks' ? null : loading || !items ? <LoadingRows rows={5} /> : items.length === 0 ? (
         <EmptyState title="Nada programado este mes" text="Cambia de mes para ver otras obligaciones." />
       ) : view === 'list' ? (
         <ul className="divide-y rounded-xl border bg-card px-4">{items.map(row)}</ul>
@@ -128,16 +129,16 @@ export default function AgendaPage() {
         </div>
       )}
 
-      <section className="mt-8">
+      {view === 'tasks' && <section className="mt-2">
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Tareas</h2>
-          <Button size="sm" disabled={!can('upload')} onClick={() => setNewTask(true)}><Plus /> Nueva tarea</Button>
+          <Button size="sm" disabled={!can('upload')} onClick={() => setNewTask(true)}><Plus /> Agregar tarea</Button>
         </div>
-        {!tasks ? <LoadingRows rows={3} /> : tasks.length === 0 ? <EmptyState title="Sin tareas" text="Crea una con el botón “Nueva tarea”." /> : (
+        {!tasks ? <LoadingRows rows={3} /> : tasks.length === 0 ? <EmptyState title="Sin tareas" text="Crea una con el botón “Agregar tarea”." /> : (
           <ul className="divide-y rounded-xl border bg-card px-4">
             {tasks.map((t) => (
               <li key={t.id} className="flex items-center gap-3 py-2.5">
-                <input type="checkbox" className="size-4" checked={t.done} disabled={!can('upload')} aria-label={`Marcar como hecha: ${t.title}`}
+                <input type="checkbox" className="size-5 accent-primary" checked={t.done} disabled={!can('upload')} aria-label={`Marcar como hecha: ${t.title}`}
                   onChange={(e) => api.agenda.setTaskDone(t.id, e.target.checked).catch((err) => toast.error(errorText(err)))} />
                 <div className={cn('min-w-0 flex-1', t.done && 'text-muted-foreground line-through')}>
                   <p className="text-sm font-medium">{t.title}</p>
@@ -148,7 +149,7 @@ export default function AgendaPage() {
             ))}
           </ul>
         )}
-      </section>
+      </section>}
 
       {paying && cfg && <PayDialog item={paying} accounts={cfg.accounts.filter((c) => c.entityId === paying.entityId)} onClose={() => setPaying(undefined)} />}
       {newTask && cfg && <TaskDialog entities={cfg.entities} today={today} onClose={() => setNewTask(false)} />}

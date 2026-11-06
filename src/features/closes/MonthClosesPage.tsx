@@ -51,7 +51,9 @@ function CloseCard({ row, month, entityName, canEdit, onReopen }: { row: Row; mo
       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Field label="Saldo del sistema"><Money value={row.systemBalance} className="text-base font-semibold" /></Field>
         <Field label="Saldo del extracto (escríbelo)">
-          <MoneyInput value={statement} onChange={setStatement} disabled={published || !canEdit} />
+          {published
+            ? <Money value={statement ?? 0} className="text-base font-semibold" />
+            : <MoneyInput value={statement} onChange={setStatement} disabled={!canEdit} />}
         </Field>
         <Field label="Diferencia">
           {row.difference === null ? <span className="text-sm text-muted-foreground">—</span> : <Money value={row.difference} sign color className="text-base font-semibold" />}
@@ -68,7 +70,7 @@ function CloseCard({ row, month, entityName, canEdit, onReopen }: { row: Row; mo
               <span className="flex items-center gap-2">
                 <Money value={d.amount} sign color />
                 {!published && canEdit && (
-                  <button type="button" aria-label="Quitar explicación" className="text-muted-foreground hover:text-red-600" onClick={() => setDiffs((x) => x.filter((_, j) => j !== i))}><Trash2 className="size-4" /></button>
+                  <button type="button" aria-label={`Quitar explicación: ${d.explanation}`} className="grid size-8 place-items-center text-muted-foreground hover:text-red-600" onClick={() => setDiffs((x) => x.filter((_, j) => j !== i))}><Trash2 className="size-4" /></button>
                 )}
               </span>
             </li>
@@ -151,6 +153,10 @@ export default function MonthClosesPage() {
         <EmptyState title="No hay cuentas para este mes" text="Revisa la empresa seleccionada arriba." />
       ) : (
         <div className="space-y-4">
+          <p className="flex items-center gap-2 text-sm font-medium" role="status">
+            <Lock className="size-4 text-muted-foreground" />
+            {rows.filter((r) => r.monthClose?.status === 'published').length} de {rows.length} cuentas publicadas · <span className="capitalize">{formatMonth(month!)}</span>
+          </p>
           {rows.map((r) => (
             <CloseCard key={`${month}-${r.account.id}`} row={r} month={month!} canEdit={can('edit')} entityName={cfg?.entities.find((e) => e.id === r.account.entityId)?.name ?? '—'} onReopen={() => setReopening(r)} />
           ))}

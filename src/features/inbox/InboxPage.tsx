@@ -44,7 +44,7 @@ export function SampleFiles() {
   if (!can('upload')) return null
   return (
     <div className="rounded-xl border bg-card p-4">
-      <p className="text-sm font-semibold">Archivos de ejemplo</p>
+      <p className="text-sm font-semibold">Probar con un archivo de ejemplo</p>
       <p className="mb-3 text-xs text-muted-foreground">Cárgalos con un clic para ver cómo los lee la IA.</p>
       <div className="grid gap-2 sm:grid-cols-2">
         {data?.map((a) => {
@@ -72,12 +72,13 @@ export default function InboxPage() {
     <div>
       <PageHeader title="Bandeja de entrada" description="Todo entra por aquí. Nada cuenta hasta que lo apruebes." actions={<ConnectedChannels />} />
       {/* grid-cols-1 explícito: sin él, la columna implícita crece con el texto más ancho y empuja la página a 845 px en celular. */}
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_380px]">
+      <div className="grid grid-cols-1 gap-6">
         <div className="space-y-4">
           <Uploader placeholder="Pega un mensaje de WhatsApp, escribe lo que pasó o adjunta archivos (fotos, PDF, Word, Excel, CSV, .eml, chats .txt, audios · máx. 20 MB)" />
+          <SampleFiles />
           <div className="flex items-center gap-1 rounded-lg bg-muted p-1 text-sm w-fit">
             {(['pendientes', 'revisados', 'todos'] as const).map((f) => (
-              <button key={f} onClick={() => setTabFilter(f)} className={cn('rounded-md px-3 py-1 capitalize transition', tabFilter === f ? 'bg-background font-medium shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
+              <button key={f} type="button" aria-pressed={tabFilter === f} onClick={() => setTabFilter(f)} className={cn('min-h-9 rounded-md px-3 py-1 capitalize transition', tabFilter === f ? 'bg-background font-medium shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
                 {f} <span className="num text-xs text-muted-foreground">{n(f)}</span>
               </button>
             ))}
@@ -113,7 +114,6 @@ export default function InboxPage() {
             </ul>
           )}
         </div>
-        <aside className="space-y-4"><SampleFiles /></aside>
       </div>
     </div>
   )

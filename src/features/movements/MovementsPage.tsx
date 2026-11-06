@@ -9,6 +9,7 @@ import { useServiceQuery } from '@/hooks/useServiceQuery'
 import { api, TYPE_NAME, type Direction, type TransactionFilters } from '@/services/api'
 import type { TransactionType } from '@/domain/types'
 import { useUI } from '@/store/ui'
+import { formatCOP } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
 const PAGE = 100
@@ -70,7 +71,7 @@ export default function MovementsPage() {
         <Field label="Hasta"><DateInput value={filters.to} onChange={(v) => set({ to: v })} /></Field>
         <div className="col-span-2 flex flex-wrap items-center gap-3 sm:col-span-3 lg:col-span-7">
           <label className="inline-flex cursor-pointer items-center gap-2 text-sm">
-            <input type="checkbox" className="size-4 accent-amber-600" checked={!!filters.withoutAttachment} onChange={(e) => set({ withoutAttachment: e.target.checked || undefined })} />
+            <input type="checkbox" className="size-5 accent-amber-600" checked={!!filters.withoutAttachment} onChange={(e) => set({ withoutAttachment: e.target.checked || undefined })} />
             <AlertTriangle className="size-4 text-amber-600" />Solo sin soporte
           </label>
           {active && <Button variant="ghost" size="sm" onClick={() => { setFilters({}); setShown(PAGE) }}><X />Limpiar filtros</Button>}
@@ -100,8 +101,9 @@ export default function MovementsPage() {
                 {rows.slice(0, shown).map((h) => {
                   const d = DIRECTION_ICON[h.direction]
                   return (
-                    <tr key={h.id} onClick={() => openTransaction(h.id)} tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && openTransaction(h.id)}
-                      className="cursor-pointer border-t transition hover:bg-muted/40 focus-visible:bg-muted/60 focus-visible:outline-none">
+                    <tr key={h.id} onClick={() => openTransaction(h.id)} tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTransaction(h.id) } }}
+                      aria-label={`Ver detalle: ${h.description}, ${formatCOP(h.amount)}`}
+                      className="cursor-pointer border-t transition hover:bg-muted/40 focus-visible:bg-muted/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-teal-700">
                       <td className="px-4 py-2.5"><DateText iso={h.date} /></td>
                       <td className="max-w-[320px] px-4 py-2.5">
                         <div className="flex items-center gap-1.5">
