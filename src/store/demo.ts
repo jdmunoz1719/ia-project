@@ -2,59 +2,59 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import * as seed from '@/data/seed'
-import { expandirTodos, saldoCuenta } from '@/domain/libro'
+import { expandAll, accountBalance } from '@/domain/ledger'
 import type {
-  Categoria, Cierre, Credito, Cuenta, Entidad, EventoHistorial, Hecho, ItemBandeja, Obligacion,
-  Proyecto, Responsable, Rol, Soporte, Tarea, Tercero,
-} from '@/domain/tipos'
-import { procesarEntrada } from '@/services/ia'
-import { ARCHIVOS_DEMO } from '@/services/ia/predefinidas'
+  Category, MonthClose, Loan, Account, Entity, AuditEvent, Transaction, InboxItem, Obligation,
+  Project, Assignee, Role, Attachment, Task, Counterparty,
+} from '@/domain/types'
+import { processIntake } from '@/services/ai'
+import { DEMO_FILES } from '@/services/ai/presets'
 
-export type Usuario = { nombre: string; email: string; rol: Rol; entidadIds?: string[] }
+export type User = { name: string; email: string; role: Role; entityIds?: string[] }
 
-export type EstadoDemo = {
+export type DemoState = {
   version: number
-  hoy: string
-  sesion: { usuario: Usuario | null; verificado: boolean }
-  entidades: Entidad[]; cuentas: Cuenta[]; proyectos: Proyecto[]; categorias: Categoria[]
-  terceros: Tercero[]; responsables: Responsable[]
-  hechos: Hecho[]; soportes: Soporte[]; bandeja: ItemBandeja[]
-  creditos: Credito[]; obligaciones: Obligacion[]; tareas: Tarea[]; cierres: Cierre[]
-  historial: EventoHistorial[]; pospuestas: Record<string, string>
-  entrantes: { whatsapp: number; correo: number }
+  today: string
+  session: { user: User | null; verified: boolean }
+  entities: Entity[]; accounts: Account[]; projects: Project[]; categories: Category[]
+  counterparties: Counterparty[]; assignees: Assignee[]
+  transactions: Transaction[]; attachments: Attachment[]; inbox: InboxItem[]
+  loans: Loan[]; obligations: Obligation[]; tasks: Task[]; monthCloses: MonthClose[]
+  history: AuditEvent[]; snoozed: Record<string, string>
+  incomingCounters: { whatsapp: number; email: number }
 }
 
-export const VERSION_DATOS = 3
+export const DATA_VERSION = 4
 
-export function estadoInicial(): EstadoDemo {
-  const g = seed.generarSemilla()
-  const lineas = expandirTodos(g.hechos, seed.cuentas)
-  const cierres = seed.cierresSeptiembre((id) => saldoCuenta(seed.cuentas.find((c) => c.id === id)!, lineas, '2026-09-30'))
-  const cfg = { ...seed, creditos: g.creditos }
-  const soportes = [...g.soportes]
-  const bandeja: ItemBandeja[] = []
-  for (const b of seed.bandejaInicial) {
-    const demo = 'archivo' in b ? ARCHIVOS_DEMO.find((a) => a.nombre === b.archivo) : undefined
-    const { soporte, item } = procesarEntrada({
-      canal: b.canal, recibidoEn: b.recibidoEn, remitente: b.nombre.replace('WhatsApp · ', ''),
-      texto: 'texto' in b ? b.texto : undefined,
-      archivo: demo && { nombre: demo.nombre, tipoMime: demo.tipoMime, tamano: demo.tamano },
-    }, cfg, { hechos: g.hechos, soportes })
-    soportes.push(soporte); bandeja.unshift(item)
+export function initialState(): DemoState {
+  const g = seed.generateSeed()
+  const lines = expandAll(g.transactions, seed.accounts)
+  const monthCloses = seed.septemberCloses((id) => accountBalance(seed.accounts.find((c) => c.id === id)!, lines, '2026-09-30'))
+  const cfg = { ...seed, loans: g.loans }
+  const attachments = [...g.attachments]
+  const inbox: InboxItem[] = []
+  for (const b of seed.initialInbox) {
+    const demo = 'file' in b ? DEMO_FILES.find((a) => a.name === b.file) : undefined
+    const { attachment, item } = processIntake({
+      channel: b.channel, receivedAt: b.receivedAt, sender: b.name.replace('WhatsApp · ', ''),
+      text: 'text' in b ? b.text : undefined,
+      file: demo && { name: demo.name, mimeType: demo.mimeType, size: demo.size },
+    }, cfg, { transactions: g.transactions, attachments })
+    attachments.push(attachment); inbox.unshift(item)
   }
   return {
-    version: VERSION_DATOS, hoy: seed.HOY_DEMO, sesion: { usuario: null, verificado: false },
-    entidades: seed.entidades, cuentas: seed.cuentas, proyectos: seed.proyectos, categorias: seed.categorias,
-    terceros: seed.terceros, responsables: seed.responsables,
-    hechos: g.hechos, soportes, bandeja, creditos: g.creditos, obligaciones: g.obligaciones, tareas: g.tareas,
-    cierres, historial: g.historial, pospuestas: {}, entrantes: { whatsapp: 0, correo: 0 },
+    version: DATA_VERSION, today: seed.DEMO_TODAY, session: { user: null, verified: false },
+    entities: seed.entities, accounts: seed.accounts, projects: seed.projects, categories: seed.categories,
+    counterparties: seed.counterparties, assignees: seed.assignees,
+    transactions: g.transactions, attachments, inbox, loans: g.loans, obligations: g.obligations, tasks: g.tasks,
+    monthCloses, history: g.history, snoozed: {}, incomingCounters: { whatsapp: 0, email: 0 },
   }
 }
 
-export const useDemo = create<EstadoDemo>()(
-  persist(() => estadoInicial(), {
+export const useDemo = create<DemoState>()(
+  persist(() => initialState(), {
     name: 'caja-clara-demo',
-    version: VERSION_DATOS,
-    migrate: () => estadoInicial(),
+    version: DATA_VERSION,
+    migrate: () => initialState(),
   }),
 )

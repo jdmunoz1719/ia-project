@@ -2,23 +2,23 @@
 // Hoy se implementa con mocks en memoria; mañana se reemplaza por `services/http` (NestJS)
 // cumpliendo el mismo tipo `Api`, sin tocar las pantallas.
 import { useDemo } from '@/store/demo'
-import { bandeja } from './mock/bandeja'
-import { intercompanias, movimientos } from './mock/movimientos'
-import { agenda, cierres, configuracion, creditos, sesion } from './mock/otros'
-import { chat, informes, inicio, tableros } from './mock/tableros'
+import { inbox } from './mock/inbox'
+import { intercompany, movements } from './mock/movements'
+import { agenda, monthCloses, settings, loans, session } from './mock/others'
+import { chat, home, reports, dashboards } from './mock/dashboards'
 
 export const api = {
-  sesion, configuracion, bandeja, movimientos, intercompanias, tableros, inicio, creditos, cierres, agenda, chat, informes,
+  session, settings, inbox, movements, intercompany, dashboards, home, loans, monthCloses, agenda, chat, reports,
   /** Avisa cuando cambian los datos (en HTTP sería un websocket o invalidación de caché). */
-  suscribir: (cb: () => void) => useDemo.subscribe(cb),
+  subscribe: (cb: () => void) => useDemo.subscribe(cb),
 }
 export type Api = typeof api
-type Resuelto<F> = F extends (...a: never[]) => Promise<infer R> ? R : never
-export type Config = Resuelto<Api['configuracion']['obtener']>
+type Resolved<F> = F extends (...a: never[]) => Promise<infer R> ? R : never
+export type Config = Resolved<Api['settings']['get']>
 
-export { NOMBRE_TIPO } from './mock/movimientos'
-export type { FiltrosMovimientos, FilaMovimiento } from './mock/movimientos'
-export { PERMISOS, type Permiso } from './mock/base'
-export { USUARIOS_DEMO, CODIGO_2FA_DEMO } from './mock/otros'
-export type { Entrada } from './ia'
-export type { RespuestaChat } from './mock/tableros'
+export { TYPE_NAME } from './mock/movements'
+export type { TransactionFilters, TransactionRow } from './mock/movements'
+export { PERMISSIONS, type Permission } from './mock/base'
+export { DEMO_USERS, DEMO_2FA_CODE } from './mock/others'
+export type { IntakeInput } from './ai'
+export type { ChatAnswer } from './mock/dashboards'

@@ -69,7 +69,7 @@ src/
   services/      # Interfaces de acceso a datos + implementación mock
     api.ts       #   interfaces (IMovimientosService, IBandejaService, ...)
     mock/        #   implementación con el store + datos semilla
-    ia/          #   "IA simulada": extractor de propuestas
+    ai/          #   "IA simulada": extractor de propuestas
   store/         # Zustand (estado persistido)
   data/seed.ts   # Datos semilla
   features/      # Una carpeta por módulo: inicio, bandeja, movimientos, intercompanias, tableros, creditos, cierres, agenda, chat, informes, configuracion
@@ -256,7 +256,7 @@ Agregar también una prueba de gasto repartido. Por ejemplo, un arriendo de $3.0
 
 ---
 
-## 8. "IA simulada" (`src/services/ia/`)
+## 8. "IA simulada" (`src/services/ai/`)
 
 Debe sentirse real en la demo. Se implementa en dos capas.
 
@@ -529,7 +529,7 @@ Se rige por `AGENTS.md` (raíz y `frontend/`). Resumen de lo que cambia frente a
 
 ## 16. Glosario (español → código en inglés)
 
-Decisión del 06/11/2026: los identificadores del código van en **inglés** (AGENTS.md §9). Los nombres de este documento son los términos de negocio; en el código se usan así:
+Decisión del 06/11/2026: los identificadores **y los valores internos** del código van en **inglés** (AGENTS.md §8). Aplicado en la rama `refactor/identificadores-en-ingles`. Los nombres de este documento son los términos de negocio; en el código se usan así:
 
 | Negocio (este documento) | Código |
 |---|---|
@@ -557,4 +557,8 @@ Decisión del 06/11/2026: los identificadores del código van en **inglés** (AG
 | Intercompañía | `intercompany` (abreviado `ic`) |
 | formatCOP, formatFecha, formatPct | `formatCOP`, `formatDate`, `formatPct` |
 
-Las rutas de la interfaz (`/bandeja`, `/entre-empresas`…) y todos los textos visibles siguen en español.
+Valores internos (uniones de tipos): estados `pending`, `approved`, `corrected`, `discarded`, `rejected`, `duplicate`; canales `manual`, `whatsapp`, `whatsapp_export`, `email`, `drive`; roles `admin`, `assistant`, `accountant`; recurrencias `monthly`, `biweekly`, `bimonthly`, `yearly`, `once`; clases de resultado `income`, `cost_of_sales`, `operating_expense`, `financial`, `investment`.
+
+Archivos principales: `domain/{types,ledger,kpis,amortization,schedule}.ts`, `services/ai/{extractor,presets}.ts`, `services/mock/{base,inbox,movements,dashboards,others}.ts`, `components/{common,panels,Uploader,Layout}.tsx`, `features/<pantalla>/<Pantalla>Page.tsx`.
+
+Las rutas de la interfaz (`/bandeja`, `/entre-empresas`…), los datos de configuración (nombres y alias que reconoce la IA) y todos los textos visibles siguen en español.
