@@ -117,7 +117,7 @@ export function Layout() {
 
   return (
     <div className="flex min-h-svh bg-background">
-      <aside className="sticky top-0 hidden h-svh w-60 shrink-0 lg:block"><Sidebar /></aside>
+      <aside className="print:hidden sticky top-0 hidden h-svh w-60 shrink-0 lg:block"><Sidebar /></aside>
       <Sheet open={menu} onOpenChange={setMenu}>
         <SheetContent side="left" className="w-64 border-0 p-0" showCloseButton={false}>
           <SheetTitle className="sr-only">Menú</SheetTitle>
@@ -125,7 +125,7 @@ export function Layout() {
         </SheetContent>
       </Sheet>
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background/90 px-4 backdrop-blur sm:px-6">
+        <header className="print:hidden sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background/90 px-4 backdrop-blur sm:px-6">
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMenu(true)} aria-label="Abrir menú"><Menu /></Button>
           <div className="flex min-w-0 items-center gap-2">
             <span className="hidden text-xs font-medium text-muted-foreground sm:inline">Ver:</span>
@@ -161,7 +161,7 @@ export function Layout() {
             </DropdownMenu>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-6 lg:px-8"><Outlet /></main>
+        <main className="print:max-w-none print:p-0 mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-6 lg:px-8"><Outlet /></main>
       </div>
       <GlobalPanels />
     </div>
