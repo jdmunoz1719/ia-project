@@ -13,11 +13,12 @@ import { api } from '@/services/api'
 import { formatDate, formatMonth } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
-function StatCard({ title, icon, children, footer, tone }: { title: string; icon: React.ReactNode; children: React.ReactNode; footer?: React.ReactNode; tone?: 'amber' | 'red' }) {
+function StatCard({ title, icon, children, footer, tone, className }: { title: string; icon: React.ReactNode; children: React.ReactNode; footer?: React.ReactNode; tone?: 'amber' | 'red'; className?: string }) {
   return (
-    <div className={cn('flex flex-col rounded-xl border bg-card p-4 shadow-xs', tone === 'red' && 'border-red-200', tone === 'amber' && 'border-amber-200')}>
+    <div className={cn('flex flex-col rounded-xl border bg-card p-4 shadow-xs', tone === 'red' && 'border-red-200', tone === 'amber' && 'border-amber-200', className)}>
       <div className="flex items-center justify-between text-sm text-muted-foreground"><span>{title}</span><span className="[&_svg]:size-4">{icon}</span></div>
-      <div className="mt-2 text-2xl font-semibold tracking-tight">{children}</div>
+      {/* La cifra escala con el ancho de la pantalla para no tocar el borde de la tarjeta. */}
+      <div className="mt-2 text-[clamp(1.125rem,0.8rem+0.7vw,1.375rem)] font-semibold tracking-tight whitespace-nowrap">{children}</div>
       {footer && <div className="mt-auto pt-2 text-xs text-muted-foreground">{footer}</div>}
     </div>
   )
@@ -36,18 +37,18 @@ export default function HomePage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm text-muted-foreground">{formatDate(today)}</p>
-          <h1 className="text-2xl font-semibold tracking-tight">Hola, {user?.name.split(' ')[0]}. ¿Qué pasó?</h1>
+          <h1 className="text-lg font-semibold tracking-tight sm:text-xl">Hola, {user?.name.split(' ')[0]}. ¿Qué pasó?</h1>
         </div>
         <div className="hidden sm:block"><ConnectedChannels /></div>
       </div>
 
       <Uploader large />
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard title="Plata disponible del grupo" icon={<Wallet />} footer={<span className="flex items-center gap-2">Hoy, sin asuntos personales <CashBasisNote /></span>}>
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <StatCard className="col-span-2 sm:col-span-1" title="Plata disponible del grupo" icon={<Wallet />} footer={<span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">Hoy, sin asuntos personales <CashBasisNote /></span>}>
           {r ? <Figure value={r.cash.value} lines={r.cash.lines} title="Plata disponible del grupo" /> : <span className="block h-8 w-32 animate-pulse rounded bg-muted" />}
         </StatCard>
-        <StatCard title={`Resultado de ${r ? formatMonth(r.month) : 'el mes'}`} icon={<TrendingUp />} footer={r?.monthResult.pendingApproval ? <span className="text-amber-700">{r.monthResult.pendingApproval} por aprobar</span> : <CashBasisNote />}>
+        <StatCard className="col-span-2 sm:col-span-1" title={`Resultado de ${r ? formatMonth(r.month) : 'el mes'}`} icon={<TrendingUp />} footer={r?.monthResult.pendingApproval ? <span className="text-amber-700">{r.monthResult.pendingApproval} por aprobar</span> : <CashBasisNote />}>
           {r ? <Figure value={r.monthResult.value} lines={r.monthResult.lines} title="Resultado del mes (grupo)" color /> : <span className="block h-8 w-32 animate-pulse rounded bg-muted" />}
         </StatCard>
         <StatCard title="Por revisar" icon={<Inbox />} tone={r?.pending ? 'amber' : undefined} footer={<Link to="/bandeja" className="text-primary hover:underline">{r?.pendingItems ?? 0} elementos en la bandeja →</Link>}>
@@ -92,7 +93,7 @@ export default function HomePage() {
               {dueSoon.slice(0, 12).map((v, i) => (
                 <li key={i}>
                   <Link to={v.link} className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/40">
-                    <div className="w-12 shrink-0 text-center"><p className="num text-lg leading-none font-semibold">{v.date.slice(8)}</p><p className="text-[10px] text-muted-foreground uppercase">{formatMonth(v.date.slice(0, 7), true)}</p></div>
+                    <div className="w-12 shrink-0 text-center"><p className="num text-lg leading-none font-semibold">{v.date.slice(8)}</p><p className="text-[11px] text-muted-foreground uppercase">{formatMonth(v.date.slice(0, 7), true)}</p></div>
                     <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{v.title}</p><p className="truncate text-xs text-muted-foreground">{v.detail}</p></div>
                     {v.type === 'installment' ? <Tag tone="blue"><Landmark />Cuota</Tag> : v.type === 'task' ? <Tag><CalendarClock />Tarea</Tag> : null}
                     {v.amount ? <Money value={v.amount} className="text-sm" /> : null}

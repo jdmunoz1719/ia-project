@@ -110,7 +110,7 @@ function conceptName(l: LedgerLine, cfg?: Config) {
 
 export function LedgerLines({ lines, cfg }: { lines: LedgerLine[]; cfg?: Config }) {
   return (
-    <div className="overflow-hidden rounded-lg border">
+    <div className="overflow-x-auto rounded-lg border">
       <table className="w-full text-sm">
         <thead className="bg-muted/50 text-xs text-muted-foreground"><tr><th className="px-3 py-2 text-left font-medium">Empresa</th><th className="px-3 py-2 text-left font-medium">Concepto</th><th className="px-3 py-2 text-right font-medium">Efecto</th></tr></thead>
         <tbody>
@@ -151,7 +151,7 @@ function TransactionDetail({ id }: { id: string }) {
           {h.attachmentIds.length === 0 && <Tag tone="amber"><AlertTriangle />Sin soporte</Tag>}
           {h.allocations.some((a) => a.entityId !== h.payerEntityId) && <Tag tone="amber">Entre empresas</Tag>}
         </div>
-        <p className="text-2xl font-semibold"><Money value={h.amount} /></p>
+        <p className="text-xl font-semibold"><Money value={h.amount} /></p>
         <p className="text-sm">{h.description}</p>
       </div>
       <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">

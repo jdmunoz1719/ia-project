@@ -23,13 +23,13 @@ export function ConnectedChannels() {
   return (
     <div className="flex flex-wrap gap-2 text-xs">
       <span className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1">
-        <button onClick={() => inject('whatsapp')} className="relative flex size-2" aria-label="Simular mensaje entrante" title="">
+        <button onClick={() => inject('whatsapp')} data-demo-trigger className="relative flex size-2" aria-label="Simular mensaje entrante" title="">
           <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60" /><span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
         </button>
         <MessageCircle className="size-3.5 text-emerald-600" />WhatsApp conectado · <span className="num">+57 310 ••• 4821</span>
       </span>
       <span className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1">
-        <button onClick={() => inject('email')} className="relative flex size-2" aria-label="Simular correo entrante"><span className="relative inline-flex size-2 rounded-full bg-sky-500" /></button>
+        <button onClick={() => inject('email')} data-demo-trigger className="relative flex size-2" aria-label="Simular correo entrante"><span className="relative inline-flex size-2 rounded-full bg-sky-500" /></button>
         <Mail className="size-3.5 text-sky-600" />Correo conectado · bandeja@cajaclara.co
       </span>
     </div>

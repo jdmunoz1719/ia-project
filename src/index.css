@@ -138,7 +138,15 @@ mark.evidencia.activa { background: oklch(0.85 0.15 85); box-shadow: 0 0 0 2px o
 
 /* En celular, todo control táctil mide al menos 44 px (WCAG 2.5.5). */
 @media (max-width: 639px) {
-  :is(main, header, [role="dialog"]) :is(button, select, input:not([type="checkbox"]):not([type="radio"]):not([type="date"]), a[data-slot="button"]) { min-height: 44px; }
-  :is(main, header, [role="dialog"]) button[aria-label] { min-width: 44px; }
+  :is(main, header, [role="dialog"]) :is(button:not([data-demo-trigger]), select, input:not([type="checkbox"]):not([type="radio"]):not([type="date"]), a[data-slot="button"]) { min-height: 44px; }
+  :is(main, header, [role="dialog"]) button[aria-label]:not([data-demo-trigger]) { min-width: 44px; }
   :is(main, header, [role="dialog"]) input[type="checkbox"] { width: 22px; height: 22px; }
 }
+
+/* Los hijos de una grilla no deben crecer más que su columna: sin esto, un texto largo
+   (nowrap/truncate) ensancha la columna 1fr y la página se desborda en horizontal. */
+:is(main, header, [role="dialog"]) .grid > * { min-width: 0; }
+
+/* Densidad de herramienta financiera: en escritorio la base baja a 15 px (todo lo que usa rem se ajusta en proporción).
+   En celular se mantiene en 16 px: con menos, iOS hace zoom al enfocar un campo. */
+@media (min-width: 1024px) { html { font-size: 15px; } }
