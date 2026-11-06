@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode, type SelectHTMLAttributes } from 'react'
+import { useRef, useState, type ReactNode, type SelectHTMLAttributes } from 'react'
 import { CalendarDays, Inbox, Info } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatCOP, formatFecha } from '@/lib/format'
@@ -99,7 +99,9 @@ export function InputDinero({ valor, onChange, className, ...p }: { valor?: numb
 /** Fecha en formato dd/mm/aaaa (independiente del idioma del navegador) con selector nativo. */
 export function InputFecha({ valor, onChange, disabled }: { valor?: string; onChange: (v: string) => void; disabled?: boolean }) {
   const [txt, setTxt] = useState(valor ? formatFecha(valor) : "")
-  useEffect(() => setTxt(valor ? formatFecha(valor) : ""), [valor])
+  // Si la fecha cambia desde afuera (otra propuesta, selector nativo), se refleja en el texto.
+  const [previo, setPrevio] = useState(valor)
+  if (valor !== previo) { setPrevio(valor); setTxt(valor ? formatFecha(valor) : "") }
   const ref = useRef<HTMLInputElement>(null)
   return (
     <div className="relative">

@@ -29,19 +29,25 @@ export function Cargador({ grande = false, placeholder }: { grande?: boolean; pl
   const navigate = useNavigate()
   const { puede, hoy } = useSesion()
 
-  useEffect(() => {
-    if (!grabando) return
-    setSegundos(0)
-    const t = setInterval(() => setSegundos((s) => s + 1), 1000)
-    const fin = setTimeout(() => terminarDictado(), 3200)
-    return () => { clearInterval(t); clearTimeout(fin) }
-  }, [grabando])
+  // Temporizadores del dictado simulado; se limpian al desmontar o al detener.
+  const timers = useRef<number[]>([])
+  const limpiarTimers = () => { timers.current.forEach((t) => clearTimeout(t)); timers.current = [] }
+  useEffect(() => limpiarTimers, [])
 
-  const terminarDictado = () => {
+  function iniciarDictado() {
+    limpiarTimers()
+    setGrabando(true)
+    setSegundos(0)
+    timers.current.push(window.setInterval(() => setSegundos((x) => x + 1), 1000), window.setTimeout(terminarDictado, 3200))
+  }
+
+  function terminarDictado() {
+    limpiarTimers()
     setGrabando(false)
     const frase = DICTADOS[nDictado.current++ % DICTADOS.length]
     let i = 0
-    const t = setInterval(() => { i += 3; setTexto(frase.slice(0, i)); if (i >= frase.length) clearInterval(t) }, 18)
+    const t = window.setInterval(() => { i += 3; setTexto(frase.slice(0, i)); if (i >= frase.length) clearInterval(t) }, 18)
+    timers.current.push(t)
   }
 
   const agregar = (fs: FileList | null) => {
@@ -96,7 +102,7 @@ export function Cargador({ grande = false, placeholder }: { grande?: boolean; pl
         </div>
       )}
       <div className="flex items-center gap-1 border-t px-2 py-2">
-        <Button variant="ghost" size="sm" onClick={() => (grabando ? terminarDictado() : setGrabando(true))} className={cn(grabando && 'text-red-600')}>
+        <Button variant="ghost" size="sm" onClick={() => (grabando ? terminarDictado() : iniciarDictado())} className={cn(grabando && 'text-red-600')}>
           {grabando ? <Square className="fill-current" /> : <Mic />}<span className="hidden sm:inline">{grabando ? 'Detener' : 'Dictar'}</span>
         </Button>
         <label className="inline-flex h-7 cursor-pointer items-center gap-1 rounded-md px-2.5 text-[0.8rem] font-medium hover:bg-muted">

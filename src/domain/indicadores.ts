@@ -41,7 +41,10 @@ function flujoNeto(cajas: LineaLibro[]) {
   const porHecho = new Map<string, number>()
   for (const l of cajas) porHecho.set(l.hechoId, (porHecho.get(l.hechoId) ?? 0) + l.monto)
   let entradas = 0, salidas = 0
-  for (const v of porHecho.values()) v > 0 ? (entradas += v) : (salidas -= v)
+  for (const v of porHecho.values()) {
+    if (v > 0) entradas += v
+    else salidas -= v
+  }
   const hechosConFlujo = new Set([...porHecho].filter(([, v]) => v !== 0).map(([k]) => k))
   return { entradas, salidas, lineas: cajas.filter((l) => hechosConFlujo.has(l.hechoId)) }
 }
