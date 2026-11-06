@@ -44,7 +44,7 @@ export default function ReviewPage() {
     <div>
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="flex min-w-0 items-center gap-3">
-          <Button variant="ghost" size="icon" nativeButton={false} render={<Link to="/bandeja" />} aria-label="Volver a la bandeja"><ArrowLeft /></Button>
+          <Button variant="ghost" size="icon" nativeButton={false} render={<Link to="/bandeja" />} aria-label="Volver a la bandeja" className="size-11 sm:size-8"><ArrowLeft /></Button>
           <span className="grid size-9 shrink-0 place-items-center rounded-full bg-muted"><ChannelIcon channel={item.channel} /></span>
           <div className="min-w-0">
             <h1 className="truncate text-lg font-semibold">{attachment.name}</h1>
@@ -63,7 +63,7 @@ export default function ReviewPage() {
       {duplicateOriginal && (
         <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm text-amber-900">
           <Copy className="size-4" /><span><b>Archivo repetido:</b> este mismo archivo ya se recibió el {formatDateTime(duplicateOriginal.receivedAt)}.</span>
-          <Link to={`/bandeja/${duplicateOriginal.itemId}`} className="font-medium underline">Posible duplicado de… ver el original</Link>
+          <Link to={`/bandeja/${duplicateOriginal.itemId}`} className="inline-flex min-h-11 items-center font-medium underline sm:min-h-0">Posible duplicado de… ver el original</Link>
         </div>
       )}
 

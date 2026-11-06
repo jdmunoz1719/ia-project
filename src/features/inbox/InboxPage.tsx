@@ -71,7 +71,8 @@ export default function InboxPage() {
   return (
     <div>
       <PageHeader title="Bandeja de entrada" description="Todo entra por aquí. Nada cuenta hasta que lo apruebes." actions={<ConnectedChannels />} />
-      <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
+      {/* grid-cols-1 explícito: sin él, la columna implícita crece con el texto más ancho y empuja la página a 845 px en celular. */}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_380px]">
         <div className="space-y-4">
           <Uploader placeholder="Pega un mensaje de WhatsApp, escribe lo que pasó o adjunta archivos (fotos, PDF, Word, Excel, CSV, .eml, chats .txt, audios · máx. 20 MB)" />
           <div className="flex items-center gap-1 rounded-lg bg-muted p-1 text-sm w-fit">
