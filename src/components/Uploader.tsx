@@ -26,6 +26,8 @@ export function Uploader({ large = false, placeholder }: { large?: boolean; plac
   const [seconds, setSeconds] = useState(0)
   const [sending, setSending] = useState(false)
   const dictationIndex = useRef(0)
+  const fileInput = useRef<HTMLInputElement>(null)
+  const cameraInput = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
   const { can, today } = useSession()
 
@@ -86,7 +88,7 @@ export function Uploader({ large = false, placeholder }: { large?: boolean; plac
           <p className="num text-sm text-red-700">Grabando… 0:{String(seconds).padStart(2, '0')}</p>
         </div>
       ) : (
-        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={large ? 4 : 3}
+        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={large ? 4 : 3} aria-label="Cuéntanos qué pasó"
           onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) send() }}
           placeholder={placeholder ?? 'Ej.: "Pagué 2.350.000 de arriendo de la bodega desde Bancolombia de la Empresa B". Pega un mensaje de WhatsApp o adjunta una foto, PDF, Excel o audio.'}
           className={cn('block w-full resize-none rounded-t-xl bg-transparent px-4 pt-3 text-base leading-relaxed outline-none placeholder:text-muted-foreground/70 lg:text-sm')} />
@@ -96,23 +98,20 @@ export function Uploader({ large = false, placeholder }: { large?: boolean; plac
           {files.map((f, i) => (
             <span key={i} className="inline-flex items-center gap-1.5 rounded-md border bg-muted/50 px-2 py-1 text-xs">
               <Paperclip className="size-3" />{f.name} <span className="text-muted-foreground">{formatSize(f.size)}</span>
-              <button onClick={() => setFiles((a) => a.filter((_, j) => j !== i))} aria-label="Quitar"><X className="size-3" /></button>
+              <button onClick={() => setFiles((a) => a.filter((_, j) => j !== i))} aria-label={`Quitar ${f.name}`}><X className="size-3" /></button>
             </span>
           ))}
         </div>
       )}
       <div className="flex items-center gap-1 border-t px-2 py-2">
-        <Button variant="ghost" size="sm" onClick={() => (recording ? stopDictation() : startDictation())} className={cn('h-11 sm:h-7', recording && 'text-red-600')}>
+        <Button variant="ghost" size="sm" onClick={() => (recording ? stopDictation() : startDictation())} aria-label={recording ? 'Detener dictado' : 'Dictar'} className={cn('h-11 sm:h-7', recording && 'text-red-600')}>
           {recording ? <Square className="fill-current" /> : <Mic />}<span className="hidden sm:inline">{recording ? 'Detener' : 'Dictar'}</span>
         </Button>
-        <label className="inline-flex h-11 cursor-pointer items-center gap-1 rounded-md px-2.5 text-[0.8rem] font-medium hover:bg-muted sm:h-7">
-          <Paperclip className="size-3.5" /><span className="hidden sm:inline">Adjuntar</span>
-          <input type="file" multiple accept={ACCEPTED_TYPES} className="hidden" onChange={(e) => { addFiles(e.target.files); e.target.value = '' }} />
-        </label>
-        <label className="inline-flex h-11 cursor-pointer items-center gap-1 rounded-md px-2.5 text-[0.8rem] font-medium hover:bg-muted sm:hidden">
-          <Camera className="size-3.5" />
-          <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { addFiles(e.target.files); e.target.value = '' }} />
-        </label>
+        {/* Los inputs de archivo van ocultos y se abren desde botones reales: así Adjuntar y Cámara funcionan con teclado. */}
+        <input ref={fileInput} type="file" multiple accept={ACCEPTED_TYPES} className="hidden" tabIndex={-1} aria-hidden="true" onChange={(e) => { addFiles(e.target.files); e.target.value = '' }} />
+        <input ref={cameraInput} type="file" accept="image/*" capture="environment" className="hidden" tabIndex={-1} aria-hidden="true" onChange={(e) => { addFiles(e.target.files); e.target.value = '' }} />
+        <Button variant="ghost" size="sm" aria-label="Adjuntar archivo" onClick={() => fileInput.current?.click()} className="h-11 sm:h-7"><Paperclip /><span className="hidden sm:inline">Adjuntar</span></Button>
+        <Button variant="ghost" size="sm" aria-label="Tomar foto" onClick={() => cameraInput.current?.click()} className="h-11 sm:hidden"><Camera /></Button>
         <span className="ml-auto hidden items-center gap-1 text-xs text-muted-foreground md:flex"><Sparkles className="size-3" />La IA propone, tú apruebas</span>
         <Button onClick={send} disabled={sending || (!text.trim() && !files.length)} className="ml-2 h-11 sm:h-8">
           {sending ? <Loader2 className="animate-spin" /> : <SendHorizontal />}Enviar
