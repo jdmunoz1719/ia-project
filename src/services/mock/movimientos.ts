@@ -99,6 +99,9 @@ export function describirEfecto(tipo: TipoHecho, campos: CamposPropuesta): { fra
         : { texto: `${e} abona ${formatCOP(-l.monto)} a lo que le debe a ${nombreEntidad(l.contraparteId)}`, tono: 'ic' })
     }
   }
+  // Orden de lectura del pliego (Ejemplo 2): primero a quién pertenece, luego de dónde sale la plata, al final quién le debe a quién.
+  const ORDEN = { neutro: 0, salida: 1, entrada: 1, ic: 2 }
+  F.sort((a, b) => ORDEN[a.tono] - ORDEN[b.tono])
   return { frases: F, lineas: ls, errores: [] }
 }
 

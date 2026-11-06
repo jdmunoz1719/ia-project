@@ -156,7 +156,7 @@ function DetalleMovimiento({ id }: { id: string }) {
       </div>
       <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
         {[
-          ['Fecha', <Fecha iso={h.fecha} />],
+          ['Fecha', <Fecha key="f" iso={h.fecha} />],
           ['Paga', n(cfg?.entidades, h.entidadPagadoraId)],
           [h.cuentaDestinoId && !h.cuentaOrigenId ? 'Entra a' : 'Sale de', cfg?.cuentas.find((c) => c.id === (h.cuentaOrigenId ?? h.cuentaDestinoId))?.nombre],
           ...(h.cuentaOrigenId && h.cuentaDestinoId ? [['Entra a', cfg?.cuentas.find((c) => c.id === h.cuentaDestinoId)?.nombre]] : []),

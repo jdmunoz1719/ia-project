@@ -44,7 +44,7 @@ export default function Revision() {
     <div>
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="flex min-w-0 items-center gap-3">
-          <Button variant="ghost" size="icon" render={<Link to="/bandeja" />} aria-label="Volver a la bandeja"><ArrowLeft /></Button>
+          <Button variant="ghost" size="icon" nativeButton={false} render={<Link to="/bandeja" />} aria-label="Volver a la bandeja"><ArrowLeft /></Button>
           <span className="grid size-9 shrink-0 place-items-center rounded-full bg-muted"><IconoCanal canal={item.canal} /></span>
           <div className="min-w-0">
             <h1 className="truncate text-lg font-semibold">{soporte.nombre}</h1>
@@ -99,7 +99,7 @@ export default function Revision() {
           <section className="space-y-4">
             <h2 className="flex items-center gap-2 text-sm font-semibold"><Sparkles className="size-4 text-primary" />Lo que propone la IA</h2>
             {procesando ? <Leyendo /> : item.propuestas.map((p, i) => (
-              <TarjetaPropuesta key={p.id} n={i + 1} itemId={item.id} p={p} cfg={cfg} onHover={setActiva} />
+              <TarjetaPropuesta key={`${p.id}:${p.estado}`} n={i + 1} itemId={item.id} p={p} cfg={cfg} onHover={setActiva} />
             ))}
           </section>
         </div>
@@ -108,15 +108,16 @@ export default function Revision() {
   )
 }
 
+const PASOS_IA = ['Leyendo el contenido original', 'Identificando montos y fechas', 'Reconociendo empresas, cuentas y proyectos', 'Proponiendo registros']
+
 function Leyendo() {
-  const pasos = ['Leyendo el contenido original', 'Identificando montos y fechas', 'Reconociendo empresas, cuentas y proyectos', 'Proponiendo registros']
   const [n, setN] = useState(0)
-  useEffect(() => { const t = setInterval(() => setN((x) => Math.min(x + 1, pasos.length - 1)), 600); return () => clearInterval(t) }, [])
+  useEffect(() => { const t = setInterval(() => setN((x) => Math.min(x + 1, PASOS_IA.length - 1)), 600); return () => clearInterval(t) }, [])
   return (
     <div className="rounded-xl border bg-card p-5">
       <p className="mb-4 flex items-center gap-2 text-sm font-medium"><Loader2 className="size-4 animate-spin text-primary" />La IA está leyendo…</p>
       <ol className="space-y-2 text-sm">
-        {pasos.map((p, i) => <li key={p} className={cn('flex items-center gap-2 transition', i > n && 'opacity-40')}>{i < n ? <Check className="size-4 text-emerald-600" /> : i === n ? <Loader2 className="size-4 animate-spin" /> : <span className="size-4" />}{p}</li>)}
+        {PASOS_IA.map((p, i) => <li key={p} className={cn('flex items-center gap-2 transition', i > n && 'opacity-40')}>{i < n ? <Check className="size-4 text-emerald-600" /> : i === n ? <Loader2 className="size-4 animate-spin" /> : <span className="size-4" />}{p}</li>)}
       </ol>
       <div className="mt-5 space-y-2"><div className="h-3 w-2/3 animate-pulse rounded bg-muted" /><div className="h-3 w-1/2 animate-pulse rounded bg-muted" /></div>
     </div>
@@ -133,7 +134,6 @@ function TarjetaPropuesta({ n, itemId, p, cfg, onHover }: { n: number; itemId: s
   const abierta = p.estado === 'pendiente'
   const esTarea = tipo === 'tarea'
 
-  useEffect(() => { setTipo(p.tipo); setC(structuredClone(p.campos)) }, [p.id, p.estado]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (!esTarea && abierta) api.bandeja.efecto(tipo as TipoHecho, c).then(setEfecto) }, [tipo, c, esTarea, abierta])
 
   const upd = (x: Partial<CamposPropuesta>) => setC((v) => ({ ...v, ...x }))
