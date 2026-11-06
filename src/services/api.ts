@@ -17,7 +17,7 @@ type Resolved<F> = F extends (...a: never[]) => Promise<infer R> ? R : never
 export type Config = Resolved<Api['settings']['get']>
 
 export { TYPE_NAME } from './mock/movements'
-export type { TransactionFilters, TransactionRow } from './mock/movements'
+export type { TransactionFilters, TransactionRow, Direction } from './mock/movements'
 export { PERMISSIONS, type Permission } from './mock/base'
 export { DEMO_USERS, DEMO_2FA_CODE } from './mock/others'
 export type { IntakeInput } from './ai'

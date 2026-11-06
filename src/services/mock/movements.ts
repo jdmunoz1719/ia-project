@@ -109,7 +109,10 @@ export type TransactionFilters = {
   entityId?: string; projectId?: string; accountId?: string; type?: TransactionType; from?: string; to?: string
   withoutAttachment?: boolean; ids?: string[]; text?: string
 }
-export type TransactionRow = Transaction & { locked: boolean; intercompany: boolean }
+// Dirección de la plata para mostrar en listas: entra, sale o se mueve dentro del grupo.
+export type Direction = 'in' | 'out' | 'internal'
+export type TransactionRow = Transaction & { locked: boolean; intercompany: boolean; direction: Direction }
+const directionOf = (h: Transaction): Direction => INFLOW_TYPES.includes(h.type) ? 'in' : TWO_ACCOUNT_TYPES.includes(h.type) ? 'internal' : 'out'
 
 export const movements = {
   list: (f: TransactionFilters = {}) => delay((): TransactionRow[] => {
@@ -125,7 +128,7 @@ export const movements = {
       && (!f.from || h.date >= f.from) && (!f.to || h.date <= f.to)
       && (!f.withoutAttachment || h.attachmentIds.length === 0)
       && (!q || h.description.toLowerCase().includes(q)))
-      .map((h) => ({ ...h, locked: isMonthLocked(h), intercompany: h.allocations.some((a) => a.entityId !== h.payerEntityId) }))
+      .map((h) => ({ ...h, locked: isMonthLocked(h), intercompany: h.allocations.some((a) => a.entityId !== h.payerEntityId), direction: directionOf(h) }))
       .reverse()
   }),
 
@@ -165,14 +168,20 @@ export const intercompany = {
     const ents = get().entities.filter((e) => visibleEntityIds().has(e.id))
     const ls = visibleLines()
     const m = intercompanyMatrix(ls, ents.map((e) => e.id))
-    const total = Object.values(m).reduce((s, row) => s + Object.values(row).reduce((a, b) => a + b, 0), 0)
-    return { entities: ents, matrix: m, total }
+    const ids = ents.map((e) => e.id)
+    // Totales por fila (lo que cada empresa debe) y por columna (lo que le deben), y la lista de deudas abiertas.
+    const owes = Object.fromEntries(ids.map((d) => [d, ids.reduce((a, c) => a + m[d][c], 0)]))
+    const owedTo = Object.fromEntries(ids.map((c) => [c, ids.reduce((a, d) => a + m[d][c], 0)]))
+    const pairs = ids.flatMap((d) => ids.filter((c) => m[d][c] > 0).map((c) => ({ debtor: d, creditor: c, value: m[d][c] }))).sort((a, b) => b.value - a.value)
+    const total = pairs.reduce((a, p) => a + p.value, 0)
+    return { entities: ents, matrix: m, owes, owedTo, pairs, total }
   }),
 
   detail: (debtor: string, creditor: string) => delay(() => {
     const { value, lines } = debtBetween(visibleLines(), debtor, creditor)
     const transactions = get().transactions
     const rows = lines.map((l) => ({ line: l, transaction: transactions.find((h) => h.id === l.transactionId)!, effect: l.entityId === debtor ? l.amount : -l.amount }))
+      .sort((a, b) => a.transaction.date.localeCompare(b.transaction.date))
     return { value, rows }
   }),
 
