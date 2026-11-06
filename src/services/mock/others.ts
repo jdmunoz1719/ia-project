@@ -144,7 +144,7 @@ export const agenda = {
 
 // ---------------- Configuración ----------------
 type Collection = 'entities' | 'accounts' | 'projects' | 'categories' | 'counterparties' | 'assignees'
-const COLLECTION_NAME: Record<Collection, string> = { entities: 'empresa', accounts: 'cuenta', projects: 'project', categories: 'categoría', counterparties: 'tercero', assignees: 'responsable' }
+const COLLECTION_NAME: Record<Collection, string> = { entities: 'empresa', accounts: 'cuenta', projects: 'proyecto', categories: 'categoría', counterparties: 'tercero', assignees: 'responsable' }
 
 export const settings = {
   get: () => delay(() => {

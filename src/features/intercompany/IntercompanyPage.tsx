@@ -36,11 +36,11 @@ export default function IntercompanyPage() {
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-xl border bg-card p-4">
               <p className="text-sm text-muted-foreground">Deuda interna total</p>
-              <p className="mt-1 text-2xl font-semibold"><Money value={data.total} /></p>
+              <p className="mt-1 text-xl font-semibold"><Money value={data.total} /></p>
             </div>
             <div className="rounded-xl border bg-card p-4">
               <p className="text-sm text-muted-foreground">Deudas abiertas</p>
-              <p className="num mt-1 text-2xl font-semibold">{data.pairs.length}</p>
+              <p className="num mt-1 text-xl font-semibold">{data.pairs.length}</p>
             </div>
             <div className="rounded-xl border bg-card p-4">
               <p className="text-sm text-muted-foreground">Mayor deuda</p>

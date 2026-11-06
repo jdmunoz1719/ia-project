@@ -89,7 +89,7 @@ export function Uploader({ large = false, placeholder }: { large?: boolean; plac
         <textarea value={text} onChange={(e) => setText(e.target.value)} rows={large ? 4 : 3}
           onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) send() }}
           placeholder={placeholder ?? 'Ej.: "Pagué 2.350.000 de arriendo de la bodega desde Bancolombia de la Empresa B". Pega un mensaje de WhatsApp o adjunta una foto, PDF, Excel o audio.'}
-          className={cn('block w-full resize-none rounded-t-xl bg-transparent px-4 pt-3.5 text-[15px] leading-relaxed outline-none placeholder:text-muted-foreground/70', large && 'text-base')} />
+          className={cn('block w-full resize-none rounded-t-xl bg-transparent px-4 pt-3 text-base leading-relaxed outline-none placeholder:text-muted-foreground/70 lg:text-sm')} />
       )}
       {files.length > 0 && (
         <div className="flex flex-wrap gap-2 px-4 pb-2">

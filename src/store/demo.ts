@@ -24,7 +24,7 @@ export type DemoState = {
   incomingCounters: { whatsapp: number; email: number }
 }
 
-export const DATA_VERSION = 4
+export const DATA_VERSION = 5
 
 export function initialState(): DemoState {
   const g = seed.generateSeed()
