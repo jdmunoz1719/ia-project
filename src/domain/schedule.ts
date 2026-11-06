@@ -62,7 +62,7 @@ export function computeAlerts(p: {
     if (d <= 2) A.push({ id: `tarea-${t.id}`, level: d < 0 ? 'red' : 'amber', title: t.title, detail: d < 0 ? `Tarea vencida hace ${-d} días` : d === 0 ? 'Tarea para hoy' : `Tarea para ${d === 1 ? 'mañana' : `dentro de ${d} días`}`, date: t.due, entityId: t.entityId, link: '/agenda' })
   }
   const withoutAttachment = p.transactions.filter((h) => h.attachmentIds.length === 0 && h.date >= addDaysIso(today, -30)).length
-  if (withoutAttachment) A.push({ id: `sinsoporte-${today.slice(0, 7)}`, level: 'amber', title: `${withoutAttachment} movimientos sin soporte`, detail: 'Últimos 30 días · adjunta el comprobante', date: today, link: '/movimientos?sinSoporte=1' })
+  if (withoutAttachment) A.push({ id: `sinsoporte-${today.slice(0, 7)}`, level: 'amber', title: `${withoutAttachment} movimientos sin soporte`, detail: 'Últimos 30 días · adjunta el comprobante', date: today, link: `/movimientos?sinSoporte=1&desde=${addDaysIso(today, -30)}` })
 
   return A.filter((a) => !(p.snoozed[a.id] && p.snoozed[a.id] > today))
     .sort((a, b) => (a.level === b.level ? a.date.localeCompare(b.date) : a.level === 'red' ? -1 : 1))

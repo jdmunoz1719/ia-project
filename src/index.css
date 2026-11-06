@@ -135,3 +135,10 @@ mark.evidencia { background: oklch(0.93 0.09 95); border-radius: 3px; padding: 0
 mark.evidencia.activa { background: oklch(0.85 0.15 85); box-shadow: 0 0 0 2px oklch(0.75 0.16 70); }
 @keyframes entra { from { opacity: 0; transform: translateY(-8px) scale(.98); background: oklch(0.95 0.06 155); } to { opacity: 1; transform: none; } }
 .animar-entrada { animation: entra .6s ease-out; }
+
+/* En celular, todo control táctil mide al menos 44 px (WCAG 2.5.5). */
+@media (max-width: 639px) {
+  :is(main, header, [role="dialog"]) :is(button, select, input:not([type="checkbox"]):not([type="radio"]):not([type="date"]), a[data-slot="button"]) { min-height: 44px; }
+  :is(main, header, [role="dialog"]) button[aria-label] { min-width: 44px; }
+  :is(main, header, [role="dialog"]) input[type="checkbox"] { width: 22px; height: 22px; }
+}
