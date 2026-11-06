@@ -109,7 +109,7 @@ export function DateInput({ value, onChange, disabled }: { value?: string; onCha
         disabled={disabled} value={txt} placeholder="dd/mm/aaaa" inputMode="numeric"
         className="num h-8 w-full rounded-lg border border-input bg-background pr-8 pl-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-60"
         onChange={(e) => {
-          const d = e.target.value.replace(/D/g, "").slice(0, 8)
+          const d = e.target.value.replace(/\D/g, "").slice(0, 8)
           setTxt(d.slice(0, 2) + (d.length > 2 ? "/" + d.slice(2, 4) : "") + (d.length > 4 ? "/" + d.slice(4) : ""))
           if (d.length === 8) onChange(`${d.slice(4)}-${d.slice(2, 4)}-${d.slice(0, 2)}`)
         }}
