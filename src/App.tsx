@@ -1,9 +1,8 @@
-import { lazy, Suspense, type ReactNode } from 'react'
+import { lazy, type ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Layout } from '@/components/Layout'
-import { LoadingRows } from '@/components/common'
 import { useSession } from '@/hooks/useSession'
 import Login from '@/features/login/Login'
 
@@ -30,27 +29,25 @@ export default function App() {
   return (
     <TooltipProvider>
       <BrowserRouter>
-        <Suspense fallback={<div className="p-8"><LoadingRows rows={6} /></div>}>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route element={<Protected><Layout /></Protected>}>
-              <Route index element={<HomePage />} />
-              <Route path="bandeja" element={<InboxPage />} />
-              <Route path="bandeja/:id" element={<ReviewPage />} />
-              <Route path="movimientos" element={<MovementsPage />} />
-              <Route path="entre-empresas" element={<IntercompanyPage />} />
-              <Route path="tableros" element={<DashboardsPage />} />
-              <Route path="creditos" element={<LoansPage />} />
-              <Route path="creditos/:id" element={<LoanDetailPage />} />
-              <Route path="cierres" element={<MonthClosesPage />} />
-              <Route path="agenda" element={<AgendaPage />} />
-              <Route path="chat" element={<ChatPage />} />
-              <Route path="informes" element={<ReportsPage />} />
-              <Route path="configuracion" element={<SettingsPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Route>
-          </Routes>
-        </Suspense>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route element={<Protected><Layout /></Protected>}>
+            <Route index element={<HomePage />} />
+            <Route path="bandeja" element={<InboxPage />} />
+            <Route path="bandeja/:id" element={<ReviewPage />} />
+            <Route path="movimientos" element={<MovementsPage />} />
+            <Route path="entre-empresas" element={<IntercompanyPage />} />
+            <Route path="tableros" element={<DashboardsPage />} />
+            <Route path="creditos" element={<LoansPage />} />
+            <Route path="creditos/:id" element={<LoanDetailPage />} />
+            <Route path="cierres" element={<MonthClosesPage />} />
+            <Route path="agenda" element={<AgendaPage />} />
+            <Route path="chat" element={<ChatPage />} />
+            <Route path="informes" element={<ReportsPage />} />
+            <Route path="configuracion" element={<SettingsPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
       </BrowserRouter>
       <Toaster richColors position="top-right" closeButton />
     </TooltipProvider>

@@ -58,7 +58,7 @@ export const LoadingRows = ({ rows = 4, className }: { rows?: number; className?
 )
 
 export const CashBasisNote = () => (
-  <span className="inline-flex items-center gap-1 whitespace-nowrap text-[11px] text-muted-foreground" title="Sólo cuenta lo que entra o sale efectivamente de caja"><Info className="size-3" />base caja</span>
+  <span className="inline-flex items-center gap-1 whitespace-nowrap text-xs text-muted-foreground" title="Cuenta cuando la plata entra o sale, no cuando se factura"><Info className="size-3" />base caja</span>
 )
 
 /** Select nativo con estilo (funciona bien en celular y sólo ofrece valores de la configuración). */
@@ -66,7 +66,7 @@ export function Selector({ className, options, emptyLabel, ...p }: SelectHTMLAtt
   const groups = [...new Set(options.map((o) => o.group))]
   const render = (os: typeof options) => os.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)
   return (
-    <select {...p} className={cn('h-8 w-full min-w-0 rounded-lg border border-input bg-background px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-60', className)}>
+    <select {...p} className={cn('h-8 lg:h-[36px] w-full min-w-0 rounded-lg border border-input bg-background px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-60', className)}>
       {emptyLabel !== undefined && <option value="">{emptyLabel}</option>}
       {groups.length > 1 || groups[0] ? groups.map((g) => <optgroup key={g ?? ''} label={g ?? ''}>{render(options.filter((o) => o.group === g))}</optgroup>) : render(options)}
     </select>
@@ -107,15 +107,15 @@ export function DateInput({ value, onChange, disabled }: { value?: string; onCha
     <div className="relative">
       <input
         disabled={disabled} value={txt} placeholder="dd/mm/aaaa" inputMode="numeric"
-        className="num h-8 w-full rounded-lg border border-input bg-background pr-8 pl-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-60"
+        className="num h-8 lg:h-[36px] w-full rounded-lg border border-input bg-background pr-9 pl-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-60"
         onChange={(e) => {
           const d = e.target.value.replace(/\D/g, "").slice(0, 8)
           setTxt(d.slice(0, 2) + (d.length > 2 ? "/" + d.slice(2, 4) : "") + (d.length > 4 ? "/" + d.slice(4) : ""))
           if (d.length === 8) onChange(`${d.slice(4)}-${d.slice(2, 4)}-${d.slice(0, 2)}`)
         }}
       />
-      <button type="button" disabled={disabled} aria-label="Abrir calendario" onClick={() => ref.current?.showPicker?.()} className="absolute top-1/2 right-1.5 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:text-foreground"><CalendarDays className="size-4" /></button>
-      <input ref={ref} type="date" tabIndex={-1} aria-hidden className="pointer-events-none absolute right-0 bottom-0 h-px w-px opacity-0" value={value ?? ""} onChange={(e) => e.target.value && onChange(e.target.value)} />
+      <button type="button" disabled={disabled} aria-label="Abrir calendario" onClick={() => ref.current?.showPicker?.()} className="absolute top-1/2 right-0.5 grid size-8 -translate-y-1/2 place-items-center rounded text-muted-foreground hover:text-foreground"><CalendarDays className="size-4" /></button>
+      <input ref={ref} type="date" tabIndex={-1} aria-hidden="true" className="pointer-events-none absolute right-0 bottom-0 h-px w-px opacity-0" value={value ?? ""} onChange={(e) => e.target.value && onChange(e.target.value)} />
     </div>
   )
 }

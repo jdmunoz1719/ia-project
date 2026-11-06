@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import {
   ArrowLeftRight, BarChart3, BookOpen, CalendarDays, ChevronDown, FileBarChart, Home, Inbox, Landmark, ListOrdered,
@@ -8,7 +8,8 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
-import { Selector } from '@/components/common'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { LoadingRows, Selector } from '@/components/common'
 import { GlobalPanels } from '@/components/panels'
 import { useServiceQuery } from '@/hooks/useServiceQuery'
 import { useSession } from '@/hooks/useSession'
@@ -19,18 +20,25 @@ import { cn } from '@/lib/utils'
 import type { Role } from '@/domain/types'
 
 export const APP_NAME = 'Caja Clara'
-const NAV = [
-  { to: '/', label: 'Inicio', icon: Home },
-  { to: '/bandeja', label: 'Bandeja', icon: Inbox, hidden: (r: Role) => r === 'accountant' },
-  { to: '/movimientos', label: 'Movimientos', icon: ListOrdered },
-  { to: '/entre-empresas', label: 'Entre empresas', icon: ArrowLeftRight },
-  { to: '/tableros', label: 'Tableros', icon: BarChart3 },
-  { to: '/creditos', label: 'Créditos', icon: Landmark },
-  { to: '/cierres', label: 'Cierres', icon: LockKeyhole },
-  { to: '/agenda', label: 'Agenda', icon: CalendarDays },
-  { to: '/chat', label: 'Chat', icon: MessageSquare },
-  { to: '/informes', label: 'Informes', icon: FileBarChart },
-  { to: '/configuracion', label: 'Configuración', icon: Settings },
+// Menú en tres grupos: lo de hoy, el dinero y lo demás.
+const NAV_GROUPS = [
+  { label: 'Hoy', items: [
+    { to: '/', label: 'Inicio', icon: Home },
+    { to: '/bandeja', label: 'Bandeja', icon: Inbox, hidden: (r: Role) => r === 'accountant' },
+    { to: '/agenda', label: 'Agenda', icon: CalendarDays },
+  ] },
+  { label: 'Dinero', items: [
+    { to: '/movimientos', label: 'Movimientos', icon: ListOrdered },
+    { to: '/entre-empresas', label: 'Entre empresas', icon: ArrowLeftRight },
+    { to: '/creditos', label: 'Créditos', icon: Landmark },
+    { to: '/tableros', label: 'Tableros', icon: BarChart3 },
+    { to: '/cierres', label: 'Cierres', icon: LockKeyhole },
+    { to: '/informes', label: 'Informes', icon: FileBarChart },
+  ] },
+  { label: 'Más', items: [
+    { to: '/chat', label: 'Chat', icon: MessageSquare },
+    { to: '/configuracion', label: 'Configuración', icon: Settings },
+  ] },
 ]
 const ROLE_NAMES: Record<Role, string> = { admin: 'Administrador', assistant: 'Asistente', accountant: 'Contador' }
 
@@ -42,7 +50,7 @@ export function Logo({ light = false }: { light?: boolean }) {
       </div>
       <div className="leading-tight">
         <p className={cn('text-[15px] font-semibold tracking-tight', light && 'text-white')}>{APP_NAME}</p>
-        <p className={cn('text-[11px]', light ? 'text-sidebar-foreground/60' : 'text-muted-foreground')}>Control financiero multiempresa</p>
+        <p className={cn('text-xs', light ? 'text-sidebar-foreground/60' : 'text-muted-foreground')}>Control financiero multiempresa</p>
       </div>
     </div>
   )
@@ -52,15 +60,20 @@ function Navigation({ onNavigate }: { onNavigate?: () => void }) {
   const { role } = useSession()
   const { data: summary } = useServiceQuery(() => api.home.summary(), [])
   return (
-    <nav className="flex flex-col gap-0.5">
-      {NAV.filter((n) => !n.hidden?.(role)).map(({ to, label, icon: Icon }) => (
-        <NavLink key={to} to={to} end={to === '/'} onClick={onNavigate}
-          className={({ isActive }) => cn('flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-            isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'text-sidebar-foreground/75 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground')}>
-          <Icon className="size-4" />
-          <span className="flex-1">{label}</span>
-          {to === '/bandeja' && !!summary?.pending && <span className="num rounded-full bg-amber-400 px-1.5 text-[11px] font-semibold text-amber-950">{summary.pending}</span>}
-        </NavLink>
+    <nav aria-label="Principal" className="flex flex-col gap-4">
+      {NAV_GROUPS.map((g) => (
+        <div key={g.label} role="group" aria-labelledby={`nav-${g.label}`} className="flex flex-col gap-0.5">
+          <p id={`nav-${g.label}`} className="px-3 pb-1 text-xs font-semibold tracking-wide text-sidebar-foreground/75 uppercase">{g.label}</p>
+          {g.items.filter((n) => !('hidden' in n && n.hidden?.(role))).map(({ to, label, icon: Icon }) => (
+            <NavLink key={to} to={to} end={to === '/'} onClick={onNavigate}
+              className={({ isActive }) => cn('flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'text-sidebar-foreground/75 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground')}>
+              <Icon className="size-4" />
+              <span className="flex-1">{label}</span>
+              {to === '/bandeja' && !!summary?.pending && <span className="num rounded-full bg-amber-400 px-1.5 text-xs font-semibold text-amber-950">{summary.pending}</span>}
+            </NavLink>
+          ))}
+        </div>
       ))}
     </nav>
   )
@@ -68,7 +81,7 @@ function Navigation({ onNavigate }: { onNavigate?: () => void }) {
 
 function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
-    <div className="flex h-full flex-col gap-6 bg-sidebar px-3 py-5 text-sidebar-foreground">
+    <div className="sidebar-root flex h-full flex-col gap-6 bg-sidebar px-3 py-5 text-sidebar-foreground">
       <div className="px-2"><Logo light /></div>
       <Navigation onNavigate={onNavigate} />
       <div className="mt-auto rounded-lg border border-sidebar-border bg-sidebar-accent/40 p-3 text-xs text-sidebar-foreground/70">
@@ -84,6 +97,7 @@ export function Layout() {
   const { view, setView } = useUI()
   const { data: cfg } = useServiceQuery(() => api.settings.get(), [user?.email])
   const [menu, setMenu] = useState(false)
+  const [confirmReset, setConfirmReset] = useState(false)
   const navigate = useNavigate()
 
   // Si el rol ya no ve la entidad seleccionada, vuelve a "Grupo".
@@ -108,8 +122,8 @@ export function Layout() {
     const m = v?.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
     if (m) { await api.session.setToday(`${m[3]}-${m[2]}-${m[1]}`); toast.success(`Fecha de la demo: ${v}`) }
   }
-  const resetDemoClick = async () => {
-    if (!confirm('¿Reiniciar la demo? Se restauran los datos semilla y se pierden los cambios.')) return
+  const resetDemo = async () => {
+    setConfirmReset(false)
     await api.session.resetDemo()
     toast.success('Demo reiniciada')
     navigate('/')
@@ -117,6 +131,7 @@ export function Layout() {
 
   return (
     <div className="flex min-h-svh bg-background">
+      <a href="#contenido" className="skip-link">Saltar al contenido</a>
       <aside className="print:hidden sticky top-0 hidden h-svh w-56 shrink-0 lg:block"><Sidebar /></aside>
       <Sheet open={menu} onOpenChange={setMenu}>
         <SheetContent side="left" className="w-64 border-0 p-0" showCloseButton={false}>
@@ -139,7 +154,7 @@ export function Layout() {
             <DropdownMenu>
               <DropdownMenuTrigger render={<Button variant="ghost" className="h-9 gap-2 px-2" />}>
                 <span className="grid size-7 place-items-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{user?.name.split(' ').map((p) => p[0]).join('').slice(0, 2)}</span>
-                <span className="hidden text-left leading-tight md:block"><span className="block text-sm font-medium">{user?.name}</span><span className="block text-[11px] text-muted-foreground">{ROLE_NAMES[role]}</span></span>
+                <span className="hidden text-left leading-tight md:block"><span className="block text-sm font-medium">{user?.name}</span><span className="block text-xs text-muted-foreground">{ROLE_NAMES[role]}</span></span>
                 <ChevronDown className="size-4 text-muted-foreground" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64">
@@ -154,16 +169,32 @@ export function Layout() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={changeDate}><CalendarDays />Cambiar fecha de la demo</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/configuracion?tab=historial')}><BookOpen />Registro de cambios</DropdownMenuItem>
-                <DropdownMenuItem onClick={resetDemoClick}><RotateCcw />Reiniciar demo</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive" onClick={() => setConfirmReset(true)}><RotateCcw />Reiniciar demo…</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={async () => { await api.session.close(); navigate('/login') }}><LogOut />Cerrar sesión</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </header>
-        <main className="print:max-w-none print:p-0 mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-6 lg:px-8"><Outlet /></main>
+        <main id="contenido" tabIndex={-1} className="print:max-w-none print:p-0 mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 outline-none sm:px-6 lg:px-8">
+          {/* El Suspense va aquí dentro: mientras carga una pantalla, el menú y la barra siguen en su lugar. */}
+          <Suspense fallback={<LoadingRows rows={6} />}><Outlet /></Suspense>
+        </main>
       </div>
       <GlobalPanels />
+      <Dialog open={confirmReset} onOpenChange={setConfirmReset}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>¿Reiniciar la demo?</DialogTitle>
+            <DialogDescription>Se restauran los datos de ejemplo y se pierden todos los cambios que hiciste. No se puede deshacer.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmReset(false)}>Cancelar</Button>
+            <Button variant="destructive" onClick={resetDemo}>Sí, reiniciar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
