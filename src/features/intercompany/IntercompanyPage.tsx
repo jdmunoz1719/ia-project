@@ -28,7 +28,7 @@ export default function IntercompanyPage() {
       <PageHeader
         title="Entre empresas"
         description="Quién le debe a quién. Sale de los movimientos aprobados: cuando una empresa paga algo de otra, queda la deuda. En la vista de grupo estas deudas no aparecen."
-        actions={can('approve') && <Button onClick={() => setRepaying('new')}><HandCoins />Registrar devolución</Button>}
+        actions={can('approve') && !data?.pairs.length && <Button onClick={() => setRepaying('new')}><HandCoins />Registrar devolución</Button>}
       />
 
       {loading || !data ? <LoadingRows rows={6} /> : (
@@ -56,7 +56,7 @@ export default function IntercompanyPage() {
                   <h2 className="font-semibold">Quién le debe a quién</h2>
                   <p className="text-xs text-muted-foreground">Cada fila es la empresa que debe; cada columna, a quién le debe. Haz clic en una cifra para ver los movimientos que la forman.</p>
                 </header>
-                <div className="overflow-x-auto">
+                <div className="relative overflow-x-auto">
                   <table className="w-full min-w-[720px] text-sm">
                     <thead className="bg-muted/50 text-xs text-muted-foreground">
                       <tr>
@@ -75,11 +75,12 @@ export default function IntercompanyPage() {
                             return (
                               <td key={c.id} className={cn('px-1.5 py-1 text-right', d.id === c.id && 'bg-muted/40')}>
                                 {v > 0 ? (
-                                  <button onClick={() => setSelected({ debtor: d.id, creditor: c.id })}
+                                  <button type="button" onClick={() => setSelected({ debtor: d.id, creditor: c.id })} aria-pressed={isSel}
+                                    aria-label={`${d.name} le debe ${formatCOP(v)} a ${c.name}. Ver los movimientos`}
                                     className={cn('w-full rounded-md px-2 py-1.5 text-right font-medium text-amber-800 transition hover:bg-amber-50', isSel && 'bg-amber-100 ring-1 ring-amber-300')}>
                                     <Money value={v} />
                                   </button>
-                                ) : <span className="px-2 text-muted-foreground/50">—</span>}
+                                ) : <span className="px-2 text-slate-600"><span aria-hidden>—</span><span className="sr-only">Sin deuda</span></span>}
                               </td>
                             )
                           })}
@@ -96,7 +97,7 @@ export default function IntercompanyPage() {
                 </div>
               </section>
 
-              <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
                 <section className="rounded-xl border bg-card">
                   <header className="border-b px-4 py-3"><h2 className="font-semibold">Deudas abiertas</h2></header>
                   <ul className="divide-y">
@@ -104,9 +105,9 @@ export default function IntercompanyPage() {
                       const isSel = current?.debtor === p.debtor && current?.creditor === p.creditor
                       return (
                         <li key={`${p.debtor}-${p.creditor}`}>
-                          <button onClick={() => setSelected(p)} className={cn('flex w-full items-center gap-2 px-4 py-3 text-left text-sm transition hover:bg-muted/50', isSel && 'bg-amber-50')}>
+                          <button type="button" onClick={() => setSelected(p)} aria-pressed={isSel} className={cn('flex min-h-11 w-full items-center gap-2 px-4 py-3 text-left text-sm transition hover:bg-muted/50', isSel && 'bg-amber-50')}>
                             <span className="min-w-0 flex-1">
-                              <span className="block truncate font-medium">{name(p.debtor)} <ArrowRight className="inline size-3.5 text-muted-foreground" /> {name(p.creditor)}</span>
+                              <span className="block truncate font-medium">{name(p.debtor)} <ArrowRight aria-hidden className="inline size-3.5 text-muted-foreground" /><span className="sr-only"> le debe a </span> {name(p.creditor)}</span>
                             </span>
                             <Money value={p.value} className="font-medium text-amber-800" />
                           </button>
@@ -152,7 +153,8 @@ function PairDetail({ pair, name, canRepay, onRepay }: { pair: Pair; name: (id: 
             </thead>
             <tbody>
               {data.rows.map((r, i) => (
-                <tr key={i} onClick={() => openTransaction(r.transaction.id)} className="cursor-pointer border-t hover:bg-muted/40">
+                <tr key={i} onClick={() => openTransaction(r.transaction.id)} tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTransaction(r.transaction.id) } }}
+                  aria-label={`Ver detalle: ${r.transaction.description}, ${r.effect > 0 ? 'aumenta' : 'baja'} la deuda en ${formatCOP(Math.abs(r.effect))}`} className="cursor-pointer border-t hover:bg-muted/40">
                   <td className="px-4 py-2.5"><DateText iso={r.transaction.date} /></td>
                   <td className="px-4 py-2.5">
                     <p className="truncate">{r.transaction.description}</p>

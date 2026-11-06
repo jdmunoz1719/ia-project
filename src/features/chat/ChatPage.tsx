@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Bot, ExternalLink, List, Lock, Send, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { PageHeader, Tag } from '@/components/common'
+import { PageHeader } from '@/components/common'
 import { openDetail } from '@/components/panels'
 import { useServiceQuery } from '@/hooks/useServiceQuery'
 import { api, type ChatAnswer } from '@/services/api'
@@ -37,7 +37,8 @@ export default function ChatPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader title="Chat" description="Pregunta por tus cifras en lenguaje natural. Las respuestas salen de los mismos cálculos que los tableros."
-        actions={<Tag tone="blue"><Lock />Solo consulta: no registra ni cambia nada</Tag>} />
+        />
+      <p className="mb-4 flex items-center gap-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-900"><Lock className="size-4 shrink-0" /><span><b>Solo consulta:</b> el chat responde con tus cifras, pero no registra ni cambia nada.</span></p>
 
       <div className="mb-4 flex flex-wrap gap-2" aria-label="Preguntas sugeridas">
         {(suggested ?? []).map((q) => (
@@ -47,7 +48,13 @@ export default function ChatPage() {
       </div>
 
       <div className="min-h-64 space-y-4 rounded-xl border bg-card p-4" aria-live="polite">
-        {messages.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">Elige una pregunta sugerida o escribe la tuya.</p>}
+        {messages.length === 0 && (
+          <div className="py-10 text-center">
+            <Bot className="mx-auto mb-2 size-8 text-muted-foreground" aria-hidden />
+            <p className="font-medium">Aún no has preguntado nada</p>
+            <p className="text-sm text-muted-foreground">Elige una pregunta sugerida o escribe la tuya.</p>
+          </div>
+        )}
         {messages.map((m) => (
           <div key={m.id} className={m.from === 'user' ? 'flex justify-end gap-2' : 'flex gap-2'}>
             {m.from === 'bot' && <Bot className="mt-1 size-5 shrink-0 text-primary" aria-hidden />}

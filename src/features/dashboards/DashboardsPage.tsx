@@ -10,8 +10,11 @@ import { KPI_NAME, type KpiKey } from '@/domain/kpis'
 import type { Scope } from '@/domain/ledger'
 import { formatCOP, formatMonth } from '@/lib/format'
 import { useUI } from '@/store/ui'
+import { cn } from '@/lib/utils'
 
-const KPI_KEYS = Object.keys(KPI_NAME) as KpiKey[]
+// Los dos indicadores que más se miran van destacados y primero.
+const MAIN_KPIS: KpiKey[] = ['netResult', 'cashBalance']
+const KPI_KEYS = [...MAIN_KPIS, ...(Object.keys(KPI_NAME) as KpiKey[]).filter((k) => !MAIN_KPIS.includes(k))]
 
 export default function DashboardsPage() {
   const { today } = useSession()
@@ -47,8 +50,8 @@ export default function DashboardsPage() {
       <PageHeader title="Tableros" description={<span className="inline-flex flex-wrap items-center gap-2">Haz clic en una cifra para ver los movimientos que la forman. <CashBasisNote /></span>} />
 
       <div className="grid grid-cols-2 gap-3 rounded-xl border bg-card p-4 sm:grid-cols-[1.5fr_1fr_1fr_auto]">
-        <Field label="Vista" className="col-span-2 sm:col-span-1">
-          <Selector aria-label="Vista" value={selected} onChange={(e) => setSelected(e.target.value)} options={viewOptions} />
+        <Field label="Ver (sigue al «Ver» de arriba; aquí también puedes elegir un proyecto)" className="col-span-2 sm:col-span-1">
+          <Selector value={selected} onChange={(e) => setSelected(e.target.value)} options={viewOptions} />
         </Field>
         <Field label="Desde"><DateInput value={from} onChange={setFrom} /></Field>
         <Field label="Hasta"><DateInput value={to} onChange={setTo} /></Field>
@@ -63,12 +66,12 @@ export default function DashboardsPage() {
       {loading || !kpis ? <LoadingRows rows={4} /> : (
         <section aria-label="Indicadores" className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {KPI_KEYS.map((k) => (
-            <div key={k} className="rounded-xl border bg-card p-4">
+            <div key={k} className={cn('rounded-xl border bg-card p-4', MAIN_KPIS.includes(k) && 'border-primary/40 bg-primary/5 ring-1 ring-primary/20 sm:col-span-2')}>
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm text-muted-foreground">{KPI_NAME[k]}</p>
                 <CashBasisNote />
               </div>
-              <Figure value={kpis[k].value} lines={kpis[k].lines} title={KPI_NAME[k]} color className="mt-1 text-xl font-semibold" />
+              <Figure value={kpis[k].value} lines={kpis[k].lines} title={KPI_NAME[k]} color className={cn('mt-1 font-semibold', MAIN_KPIS.includes(k) ? 'text-3xl' : 'text-xl')} />
               {kpis[k].pendingApproval > 0 && <Tag tone="amber" className="mt-2"><Inbox />{kpis[k].pendingApproval} por aprobar</Tag>}
             </div>
           ))}
@@ -78,16 +81,16 @@ export default function DashboardsPage() {
 
       <section className="rounded-xl border bg-card p-4">
         <h2 className="mb-3 text-sm font-semibold">Ingresos frente a egresos · últimos 6 meses</h2>
-        <div className="h-64" role="img" aria-label="Gráfica de barras de ingresos y egresos por mes">
+        <div className="h-64" role="img" aria-label={`Gráfica de barras de ingresos y egresos de los últimos ${chartData.length} meses${chartData.length ? `, de ${chartData[0].mes} a ${chartData[chartData.length - 1].mes}` : ''}`}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="mes" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 11 }} width={92} tickFormatter={(v: number) => formatCOP(v)} />
+              <YAxis tick={{ fontSize: 11 }} width={64} tickFormatter={(v: number) => `$ ${Math.round(v / 1e6)} M`} />
               <Tooltip formatter={(v) => formatCOP(Number(v))} />
-              <Legend />
-              <Bar dataKey="Ingresos" fill="#059669" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="Egresos" fill="#dc2626" radius={[3, 3, 0, 0]} />
+              <Legend formatter={(v) => <span className="text-slate-700">{v}</span>} />
+              <Bar dataKey="Ingresos" fill="#047857" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="Egresos" fill="#b91c1c" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

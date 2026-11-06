@@ -117,7 +117,7 @@ export default function ReportsPage() {
                       <tr key={c.kind + c.category} className="border-b">
                         <td className="py-1.5">{c.category}</td><td className="py-1.5 text-muted-foreground">{KIND_LABEL[c.kind] ?? c.kind}</td>
                         <td className="py-1.5 text-right">
-                          <button type="button" className="cursor-pointer underline decoration-dotted underline-offset-4 hover:text-primary print:no-underline" title="Ver los movimientos que forman esta cifra"
+                          <button type="button" className="inline-flex min-h-8 min-w-8 cursor-pointer items-center justify-end underline decoration-dotted underline-offset-4 hover:text-primary print:no-underline" aria-label={`${c.category}: ver los movimientos que forman la cifra`} title="Ver los movimientos que forman esta cifra"
                             onClick={() => openDetail(c.category, c.transactionIds, KIND_LABEL[c.kind])}><Money value={c.value} /></button>
                         </td>
                       </tr>
